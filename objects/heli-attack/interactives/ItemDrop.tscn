@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://ixewxg0qj7p2"]
+
+[ext_resource type="Script" uid="uid://bojdhe0yyqjov" path="res://objects/heli-attack/interactives/item_drop.gd" id="1_r1axv"]
+[ext_resource type="PackedScene" uid="uid://crudnplev28np" path="res://objects/heli-attack/weapons/Pistol.tscn" id="2_623k7"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r1axv"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_s5uvq"]
+size = Vector3(0.9, 0.9, 0.9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_s5uvq"]
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="ItemDrop" type="CharacterBody3D"]
+script = ExtResource("1_r1axv")
+weapon_scene = ExtResource("2_623k7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+visible = false
+shape = SubResource("BoxShape3D_r1axv")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+visible = false
+mesh = SubResource("BoxMesh_s5uvq")
+
+[node name="PickupTrigger" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PickupTrigger"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("BoxShape3D_s5uvq")

@@ -1,0 +1,191 @@
+[gd_scene load_steps=17 format=3 uid="uid://ipsqp3uaj0i5"]
+
+[ext_resource type="Script" uid="uid://dc8bxg5qiystw" path="res://scenes/hud.gd" id="1_3swnk"]
+[ext_resource type="Texture2D" uid="uid://c7hodtymkcx6u" path="res://sprites/ui/HealthUnder.png" id="3_uxdf7"]
+[ext_resource type="Texture2D" uid="uid://1hxlak5iye8l" path="res://sprites/ui/Health.png" id="4_5357l"]
+[ext_resource type="Texture2D" uid="uid://d1c2ght4xba5w" path="res://sprites/ui/HealthLabel.png" id="5_iypfu"]
+[ext_resource type="Texture2D" uid="uid://b72uuevxy28l0" path="res://sprites/ui/JumpUnder.png" id="6_qpprf"]
+[ext_resource type="Texture2D" uid="uid://ditujr2oafgwy" path="res://sprites/ui/Jump.png" id="7_3xg78"]
+[ext_resource type="Texture2D" uid="uid://ctyqjl2j0bcn6" path="res://sprites/ui/JumpLabel.png" id="8_48y67"]
+[ext_resource type="Texture2D" uid="uid://ba5avgpioafkr" path="res://sprites/ui/SpecialUnder.png" id="9_084dp"]
+[ext_resource type="Texture2D" uid="uid://djtg7deg3vrni" path="res://sprites/ui/Special.png" id="10_y2nlu"]
+[ext_resource type="Texture2D" uid="uid://wlclhkdngayj" path="res://sprites/ui/SpecialLabel.png" id="11_kp442"]
+[ext_resource type="Texture2D" uid="uid://c7uuw3nlqr3to" path="res://sprites/ui/TimeWarp.png" id="12_gltyx"]
+[ext_resource type="Texture2D" uid="uid://blcoudeydci21" path="res://sprites/ui/ReloadNewUnder.png" id="13_eld54"]
+[ext_resource type="FontFile" uid="uid://cjecoe1uicp8e" path="res://fonts/IBMPlexMono-Regular.woff2" id="13_mgfyp"]
+[ext_resource type="Texture2D" uid="uid://c7lqueupasoel" path="res://sprites/ui/Reload.png" id="14_3swnk"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_eld54"]
+font = ExtResource("13_mgfyp")
+font_size = 32
+font_color = Color(0.98896056, 0.7648709, 0.3329911, 1)
+outline_size = 2
+outline_color = Color(0.99468905, 0.81346375, 0.5419085, 1)
+shadow_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_ya4ey"]
+font = ExtResource("13_mgfyp")
+font_size = 32
+shadow_color = Color(0, 0, 0, 1)
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_3swnk")
+
+[node name="PlayerBars" type="VBoxContainer" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -191.0
+offset_right = 327.0
+offset_bottom = -20.0
+grow_vertical = 0
+
+[node name="Health" type="TextureProgressBar" parent="PlayerBars"]
+layout_mode = 2
+value = 50.0
+texture_under = ExtResource("3_uxdf7")
+texture_progress = ExtResource("4_5357l")
+
+[node name="TextureRect" type="TextureRect" parent="PlayerBars/Health"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -148.0
+offset_top = -20.0
+offset_right = 148.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_iypfu")
+stretch_mode = 2
+
+[node name="Jump" type="TextureProgressBar" parent="PlayerBars"]
+layout_mode = 2
+value = 80.0
+texture_under = ExtResource("6_qpprf")
+texture_progress = ExtResource("7_3xg78")
+
+[node name="TextureRect" type="TextureRect" parent="PlayerBars/Jump"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -28.5
+offset_top = -18.0
+offset_right = 28.5
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_48y67")
+stretch_mode = 2
+
+[node name="Special" type="TextureProgressBar" parent="PlayerBars"]
+layout_mode = 2
+value = 40.0
+texture_under = ExtResource("9_084dp")
+texture_progress = ExtResource("10_y2nlu")
+
+[node name="TextureRect2" type="TextureRect" parent="PlayerBars/Special"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -39.5
+offset_top = -14.5
+offset_right = 39.5
+offset_bottom = 4.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("11_kp442")
+stretch_mode = 2
+
+[node name="SpecialType" type="TextureRect" parent="PlayerBars/Special"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 13.0
+offset_top = -48.0
+offset_right = 106.0
+offset_bottom = 3.0
+grow_vertical = 0
+texture = ExtResource("12_gltyx")
+stretch_mode = 2
+
+[node name="ProgressData" type="VBoxContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -88.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = 88.0
+grow_horizontal = 0
+alignment = 2
+
+[node name="Money" type="Label" parent="ProgressData"]
+layout_mode = 2
+text = "$ 300"
+label_settings = SubResource("LabelSettings_eld54")
+
+[node name="EnemyProgress" type="HBoxContainer" parent="ProgressData"]
+layout_mode = 2
+alignment = 2
+
+[node name="EnemyCount" type="Label" parent="ProgressData/EnemyProgress"]
+layout_mode = 2
+text = "0"
+label_settings = SubResource("LabelSettings_ya4ey")
+
+[node name="WeaponData" type="VBoxContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -209.0
+offset_top = -138.0
+offset_right = -94.0
+offset_bottom = -50.0
+grow_horizontal = 0
+grow_vertical = 0
+alignment = 2
+
+[node name="WeaponName" type="Label" parent="WeaponData"]
+layout_mode = 2
+text = "Pistol"
+label_settings = SubResource("LabelSettings_ya4ey")
+
+[node name="WeaponAmmo" type="HBoxContainer" parent="WeaponData"]
+layout_mode = 2
+alignment = 2
+
+[node name="WeaponAmmoCount" type="Label" parent="WeaponData/WeaponAmmo"]
+layout_mode = 2
+text = "∞"
+label_settings = SubResource("LabelSettings_ya4ey")
+
+[node name="Reload" type="TextureProgressBar" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -75.0
+offset_top = -338.0
+offset_right = 66.0
+offset_bottom = -29.0
+grow_horizontal = 0
+grow_vertical = 0
+value = 60.0
+fill_mode = 3
+texture_under = ExtResource("13_eld54")
+texture_progress = ExtResource("14_3swnk")

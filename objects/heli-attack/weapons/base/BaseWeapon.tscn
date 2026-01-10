@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://dktgiixaq0jky"]
+
+[ext_resource type="Script" uid="uid://ysk68gnekdpp" path="res://objects/heli-attack/weapons/base/BaseWeapon.gd" id="1_h74rh"]
+
+[node name="BaseWeapon" type="Node3D"]
+script = ExtResource("1_h74rh")
+
+[node name="Muzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)

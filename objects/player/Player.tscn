@@ -1,0 +1,78 @@
+[gd_scene load_steps=13 format=3 uid="uid://cbil5ndxx8jop"]
+
+[ext_resource type="Script" uid="uid://8ymff8mt5h64" path="res://objects/player/player.gd" id="1_gndvh"]
+[ext_resource type="PackedScene" uid="uid://crudnplev28np" path="res://objects/heli-attack/weapons/Pistol.tscn" id="2_6vqvp"]
+[ext_resource type="AudioStream" uid="uid://gs13hpg6x7c0" path="res://sounds/robot_jump.wav" id="3_f6j3j"]
+[ext_resource type="Texture2D" uid="uid://cvr756jri74fh" path="res://sprites/player/gun-placeholder.png" id="3_veo1v"]
+[ext_resource type="AudioStream" uid="uid://c52um5ycfub4w" path="res://sounds/robot_land.wav" id="4_seukq"]
+[ext_resource type="Script" uid="uid://c4abx6w2fa6et" path="res://objects/player/player_resources.gd" id="5_seukq"]
+[ext_resource type="Script" uid="uid://pn62h0s3f0yg" path="res://objects/player/player_state_machine.gd" id="6_sderm"]
+[ext_resource type="Texture2D" uid="uid://xa5rljgucjv3" path="res://sprites/player/Base.png" id="7_t2uaq"]
+[ext_resource type="Texture2D" uid="uid://dkfel4u52blri" path="res://sprites/player/Face.png" id="8_45d0k"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_u8t0g"]
+radius = 0.33
+height = 1.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tidn2"]
+albedo_color = Color(0, 0, 0, 1)
+emission_enabled = true
+emission = Color(0.20098594, 0.4927116, 0.090110384, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_tidn2"]
+material = SubResource("StandardMaterial3D_tidn2")
+radius = 0.33
+height = 1.5
+
+[node name="Player" type="CharacterBody3D" groups=["player"]]
+script = ExtResource("1_gndvh")
+weapon_scenes = Array[PackedScene]([ExtResource("2_6vqvp")])
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("CapsuleShape3D_u8t0g")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+visible = false
+mesh = SubResource("CapsuleMesh_tidn2")
+
+[node name="WeaponPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="CharSprite-Weapon" type="Sprite3D" parent="WeaponPivot"]
+transform = Transform3D(0.21459176, 0.6241397, 0, -0.6241397, 0.21459176, 0, 0, 0, 0.66, -0.2718656, 0.37826085, 0.08331299)
+texture_filter = 0
+texture = ExtResource("3_veo1v")
+
+[node name="WeaponSocket" type="Node3D" parent="WeaponPivot"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+
+[node name="SoundFX" type="Node" parent="."]
+
+[node name="JumpSound" type="AudioStreamPlayer3D" parent="SoundFX"]
+stream = ExtResource("3_f6j3j")
+volume_db = 1.0
+
+[node name="LandingSound" type="AudioStreamPlayer3D" parent="SoundFX"]
+stream = ExtResource("4_seukq")
+volume_db = 1.0
+
+[node name="Resources" type="Node" parent="." node_paths=PackedStringArray("state_machine")]
+script = ExtResource("5_seukq")
+state_machine = NodePath("../StateMachine")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("player", "resources")]
+script = ExtResource("6_sderm")
+player = NodePath("..")
+resources = NodePath("../Resources")
+
+[node name="CharSprite-Base" type="Sprite3D" parent="."]
+transform = Transform3D(0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, 0.06526947, 0.6111026, 0)
+texture_filter = 0
+texture = ExtResource("7_t2uaq")
+
+[node name="CharSprite-Head" type="Sprite3D" parent="."]
+transform = Transform3D(0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, -0.08307052, 1.5288328, -0.15930176)
+texture_filter = 0
+texture = ExtResource("8_45d0k")

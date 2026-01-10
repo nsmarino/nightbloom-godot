@@ -1,0 +1,112 @@
+[gd_scene load_steps=9 format=3 uid="uid://dm0ymt1k01748"]
+
+[ext_resource type="Script" uid="uid://b1esvavhc0ixb" path="res://scenes/main.gd" id="1_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://c4nr4wyx8w452" path="res://objects/heli-attack/level/CameraRig.tscn" id="3_85g3d"]
+[ext_resource type="PackedScene" uid="uid://dsin5ghpmprho" path="res://objects/heli-attack/level/ground.tscn" id="6_tefeu"]
+[ext_resource type="PackedScene" uid="uid://dl8iumvu1ur81" path="res://models/level/ground/church-scene.glb" id="8_tipki"]
+[ext_resource type="PackedScene" uid="uid://dhdh8hj67tmq1" path="res://models/character/luneth-ref.glb" id="9_85g3d"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_o6xl0"]
+sky_top_color = Color(0.82210153, 0.9125199, 0.9345695, 1)
+sky_horizon_color = Color(0.0718021, 0.52894753, 0.76934767, 1)
+sky_curve = 0.32768372
+ground_bottom_color = Color(0.009805354, 0.0002562972, 0.00017072316, 1)
+ground_horizon_color = Color(0.07058824, 0.5294118, 0.76862746, 1)
+ground_curve = 0.24833463
+energy_multiplier = 0.8
+
+[sub_resource type="Sky" id="Sky_tipki"]
+sky_material = SubResource("ProceduralSkyMaterial_o6xl0")
+
+[sub_resource type="Environment" id="Environment_tefeu"]
+background_mode = 2
+sky = SubResource("Sky_tipki")
+ssao_enabled = true
+ssao_radius = 2.0
+ssao_intensity = 16.0
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.6474962, 0.8828661, 0.99668556, 1)
+fog_light_energy = 0.95
+fog_density = 0.6253
+fog_sky_affect = 0.413
+fog_depth_begin = 0.0
+fog_depth_end = 800.0
+volumetric_fog_density = 0.001
+volumetric_fog_albedo = Color(0.702536, 0.26669753, 0.09136739, 1)
+adjustment_enabled = true
+adjustment_contrast = 1.13
+adjustment_saturation = 1.38
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_0xm2m")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_tefeu")
+
+[node name="CameraRig" parent="." node_paths=PackedStringArray("target") instance=ExtResource("3_85g3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0)
+target = NodePath("")
+
+[node name="Camera3D" parent="CameraRig" index="0"]
+transform = Transform3D(1, 0, 0, 0, 0.9986295, -0.05233596, 0, 0.05233596, 0.9986295, 0, -5, 150)
+fov = 5.0
+
+[node name="Level" type="Node" parent="."]
+
+[node name="Ground" parent="Level" instance=ExtResource("6_tefeu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.065345764, 0, 0)
+visible = false
+
+[node name="Decoration" type="Node" parent="Level"]
+
+[node name="Background" type="Node" parent="Level"]
+
+[node name="Enemies" type="Node" parent="."]
+
+[node name="Lighting" type="Node" parent="."]
+
+[node name="SpotLight3D" type="SpotLight3D" parent="Lighting"]
+transform = Transform3D(0.9659259, 7.1967086e-09, 0.25881907, -0.12940954, 0.86602545, 0.4829629, -0.22414389, -0.5, 0.8365163, -1.1498928, 6.068944, 11.357614)
+visible = false
+light_energy = 20.0
+spot_range = 20.0
+spot_angle = 15.0
+
+[node name="SpotLight3D2" type="SpotLight3D" parent="Lighting"]
+transform = Transform3D(0.9659259, 7.1967086e-09, 0.25881907, -0.12940954, 0.86602545, 0.4829629, -0.22414389, -0.5, 0.8365163, 3.8799963, 6.068944, 11.357614)
+visible = false
+light_energy = 20.0
+spot_range = 20.0
+spot_angle = 15.0
+
+[node name="SpotLight3D3" type="SpotLight3D" parent="Lighting"]
+transform = Transform3D(0.9659259, 7.1967086e-09, 0.25881907, -0.12940954, 0.86602545, 0.4829629, -0.22414389, -0.5, 0.8365163, 8.468502, 2.8131428, 11.357614)
+visible = false
+light_energy = 20.0
+spot_range = 20.0
+spot_angle = 15.0
+
+[node name="SpotLight3D4" type="SpotLight3D" parent="Lighting"]
+transform = Transform3D(0.9659259, 7.1967086e-09, 0.25881907, -0.12940954, 0.86602545, 0.4829629, -0.22414389, -0.5, 0.8365163, 15.515434, 6.1352997, 11.357614)
+visible = false
+light_energy = 20.0
+spot_range = 20.0
+spot_angle = 15.0
+
+[node name="SpotLight3D5" type="SpotLight3D" parent="Lighting"]
+transform = Transform3D(0.9659259, 7.1967086e-09, 0.25881907, -0.12940954, 0.86602545, 0.4829629, -0.22414389, -0.5, 0.8365163, 21.169252, 6.1352997, 11.357614)
+visible = false
+light_energy = 20.0
+spot_range = 20.0
+spot_angle = 15.0
+
+[node name="church-scene" parent="." instance=ExtResource("8_tipki")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.062462, 20.831585, -51.279484)
+
+[node name="luneth-ref" parent="." instance=ExtResource("9_85g3d")]
+
+[node name="luneth-ref2" parent="." instance=ExtResource("9_85g3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.355669, 22.062317, -45.503544)
+
+[editable path="CameraRig"]
