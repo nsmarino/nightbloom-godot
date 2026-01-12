@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Nightbloom v1"
-config/tags=PackedStringArray("avern_starter")
+config/tags=PackedStringArray("game")
 run/main_scene="uid://dm0ymt1k01748"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
