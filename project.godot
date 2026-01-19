@@ -93,3 +93,13 @@ FlyDown={
 "events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"button_index":10,"pressure":0.0,"pressed":false,"script":null)
 ]
 }
+Jump={
+"deadzone": 0.2,
+"events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"button_index":0,"pressure":0.0,"pressed":true,"script":null)
+]
+}
+
+[rendering]
+
+anti_aliasing/quality/msaa_3d=1
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)

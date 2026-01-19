@@ -1,59 +1,39 @@
-[gd_scene load_steps=11 format=3 uid="uid://dm0ymt1k01748"]
+[gd_scene load_steps=8 format=3 uid="uid://dm0ymt1k01748"]
 
 [ext_resource type="Script" uid="uid://b1esvavhc0ixb" path="res://scenes/main.gd" id="1_0xm2m"]
-[ext_resource type="Script" uid="uid://c53xuce5up7n1" path="res://scenes/character_body_3d.gd" id="6_o6xl0"]
-[ext_resource type="PackedScene" uid="uid://dsin5ghpmprho" path="res://objects/heli-attack/level/ground.tscn" id="6_tefeu"]
-[ext_resource type="PackedScene" uid="uid://dl8iumvu1ur81" path="res://models/level/ground/church-scene.glb" id="8_tipki"]
-[ext_resource type="PackedScene" uid="uid://dhdh8hj67tmq1" path="res://models/character/luneth-ref.glb" id="9_85g3d"]
+[ext_resource type="PackedScene" uid="uid://cowyb5vnlbv4i" path="res://scenes/navigator.tscn" id="2_tbgi4"]
+[ext_resource type="PackedScene" uid="uid://2myecja8hqt2" path="res://models/level/ground/Windmill.blend" id="3_jyhfs"]
+[ext_resource type="Environment" uid="uid://ddo455a1peyhr" path="res://scenes/main-environment.tres" id="3_sugp2"]
+[ext_resource type="PackedScene" uid="uid://b5brr4ocp0cpg" path="res://models/level/decoration/wall-with-baked-paint.glb" id="5_tbgi4"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_o6xl0"]
-sky_top_color = Color(0.82210153, 0.9125199, 0.9345695, 1)
-sky_horizon_color = Color(0.0718021, 0.52894753, 0.76934767, 1)
-sky_curve = 0.32768372
-ground_bottom_color = Color(0.009805354, 0.0002562972, 0.00017072316, 1)
-ground_horizon_color = Color(0.07058824, 0.5294118, 0.76862746, 1)
-ground_curve = 0.24833463
-energy_multiplier = 0.8
+[sub_resource type="PlaneMesh" id="PlaneMesh_sugp2"]
+size = Vector2(40, 40)
 
-[sub_resource type="Sky" id="Sky_tipki"]
-sky_material = SubResource("ProceduralSkyMaterial_o6xl0")
-
-[sub_resource type="Environment" id="Environment_tefeu"]
-background_mode = 2
-sky = SubResource("Sky_tipki")
-ssao_enabled = true
-ssao_radius = 2.0
-ssao_intensity = 16.0
-fog_enabled = true
-fog_mode = 1
-fog_light_color = Color(0.6474962, 0.8828661, 0.99668556, 1)
-fog_light_energy = 0.95
-fog_density = 0.6253
-fog_sky_affect = 0.413
-fog_depth_begin = 0.0
-fog_depth_end = 800.0
-volumetric_fog_density = 0.001
-volumetric_fog_albedo = Color(0.702536, 0.26669753, 0.09136739, 1)
-adjustment_enabled = true
-adjustment_contrast = 1.13
-adjustment_saturation = 1.38
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tbgi4"]
-height = 3.0
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_tefeu"]
-height = 3.0
+[sub_resource type="BoxShape3D" id="BoxShape3D_sugp2"]
+size = Vector3(40, 1, 40)
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_0xm2m")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_tefeu")
+[node name="Navigator" parent="." instance=ExtResource("2_tbgi4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8.14905)
+use_gravity = true
 
 [node name="Level" type="Node" parent="."]
 
-[node name="Ground" parent="Level" instance=ExtResource("6_tefeu")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.065345764, 0, 0)
+[node name="Ground" type="Node" parent="Level"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Level/Ground"]
+mesh = SubResource("PlaneMesh_sugp2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Level/Ground"]
+collision_layer = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/Ground/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.46681786, 0)
+shape = SubResource("BoxShape3D_sugp2")
+
+[node name="Windmill" parent="Level/Ground" instance=ExtResource("3_jyhfs")]
 visible = false
 
 [node name="Decoration" type="Node" parent="Level"]
@@ -64,30 +44,22 @@ visible = false
 
 [node name="Lighting" type="Node" parent="."]
 
-[node name="church-scene" parent="." instance=ExtResource("8_tipki")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.062462, 20.831585, -51.279484)
+[node name="SpotLight3D" type="SpotLight3D" parent="Lighting"]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, -5, 7, 1)
+light_color = Color(0.95, 0.83790004, 0.38950002, 1)
+light_energy = 11.176
+spot_range = 36.349
 
-[node name="luneth-ref" parent="." instance=ExtResource("9_85g3d")]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lighting"]
+transform = Transform3D(0.8660254, 0.25, -0.4330127, 0, 0.8660254, 0.5, 0.5, -0.4330127, 0.75, 0, 0, 0)
+light_color = Color(0.9999998, 0.9737739, 0.8628186, 1)
+light_energy = 0.9
+shadow_enabled = true
+directional_shadow_fade_start = 0.214
+sky_mode = 1
 
-[node name="luneth-ref2" parent="." instance=ExtResource("9_85g3d")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.355669, 22.062317, -45.503544)
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("3_sugp2")
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.587376, 18.836323, -41.794724)
-script = ExtResource("6_o6xl0")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-shape = SubResource("CapsuleShape3D_tbgi4")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-mesh = SubResource("CapsuleMesh_tefeu")
-
-[node name="CameraPivot" type="Node3D" parent="CharacterBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
-
-[node name="Camera3D" type="Camera3D" parent="CharacterBody3D/CameraPivot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 15)
-current = true
-fov = 43.0
+[node name="wall-with-baked-paint24" parent="." instance=ExtResource("5_tbgi4")]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, -30.5, 10.5, -62)

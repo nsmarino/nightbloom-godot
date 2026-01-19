@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://cowyb5vnlbv4i"]
+
+[ext_resource type="Script" uid="uid://c53xuce5up7n1" path="res://scenes/character_body_3d.gd" id="1_m88ny"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tbgi4"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_tefeu"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_m88ny"]
+
+[node name="Navigator" type="CharacterBody3D"]
+script = ExtResource("1_m88ny")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_tbgi4")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CapsuleMesh_tefeu")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.05, 0)
+collision_mask = 2
+shape = SubResource("SphereShape3D_m88ny")
+spring_length = 20.0
+margin = 0.5
+
+[node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+current = true
+fov = 43.0
