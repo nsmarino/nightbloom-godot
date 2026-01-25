@@ -25,7 +25,7 @@ var _was_on_floor_last_frame := true
 @onready var _jump_sound: AudioStreamPlayer3D = $SoundFX/JumpSound
 @onready var _landing_sound: AudioStreamPlayer3D = $SoundFX/LandingSound
 
-@onready var Resources = $Resources
+@onready var Resources: PlayerResources = $Resources
 
 # World XY plane at z=0
 const TARGET_PLANE := Plane(Vector3(0, 0, 1), 0.0)
@@ -48,9 +48,8 @@ var _weapons: Array[BaseWeapon] = []
 var _current_weapon: BaseWeapon
 var _current_index: int = 0
 
-signal update_player_reload(value)
-signal update_equipped_weapon(display_name, ammo_count)
-signal update_ammo(count)
+signal update_player_reload(value: float)
+signal update_equipped_weapon(display_name: String, ammo_count: int)
 
 func _ready() -> void:
 	_instance_weapons()
@@ -132,7 +131,7 @@ func _physics_process(delta: float) -> void:
 func _process(delta: float) -> void:
 	
 	# Calculate reload percentage (0 = just fired, 100 = ready to fire)
-	var reload_percentage = 0.0
+	var reload_percentage: float = 0.0
 	if _current_weapon and _current_weapon.cooldown_timer.wait_time > 0:
 		reload_percentage = ((1.0 - (_current_weapon.cooldown_timer.time_left / _current_weapon.cooldown_timer.wait_time)) * 100.0)
 	update_player_reload.emit(reload_percentage)
@@ -188,13 +187,13 @@ func discard() -> void:
 		return
 	
 	# Store the weapon to remove and its index
-	var weapon_to_remove = _current_weapon
-	var old_index = _current_index
+	var weapon_to_remove: BaseWeapon = _current_weapon
+	var old_index: int = _current_index
 	
 	# Calculate the new index (previous weapon with wrap-around)
 	# If we're at index 0, wrap to the end of the array (after removal)
 	# Otherwise, go to the previous weapon
-	var new_index = old_index - 1 if old_index > 0 else _weapons.size() - 2
+	var new_index: int = old_index - 1 if old_index > 0 else _weapons.size() - 2
 	
 	# If this is the last weapon, clear everything
 	if _weapons.size() == 1:

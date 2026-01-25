@@ -1,8 +1,6 @@
 extends Node
 class_name PlayerResources
 
-@export var state_machine : Node
-
 @export var max_health : float = 100
 @export var health : float = 100
 
@@ -23,28 +21,27 @@ func _ready() -> void:
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	pass
 
-func lose_health(amount : float):
+func lose_health(amount : float) -> void:
 	health -= amount
 	if health < 1:
 		Events.player_killed.emit()
 	update_player_health.emit(health)
-	
-func gain_health(amount : float):
+
+func gain_health(amount : float) -> void:
 	if health + amount <= max_health:
 		health += amount
 	else:
 		health = max_health
 	update_player_health.emit(health)
-	
 
-func gain_money(amount: int):
+func gain_money(amount: int) -> void:
 	money += amount
 	update_player_money.emit(money)
-	
-func lose_money(amount : int):
+
+func lose_money(amount : int) -> void:
 	money -= amount
 	if money < 0:
 		money = 0

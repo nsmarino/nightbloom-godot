@@ -13,21 +13,21 @@ func _ready() -> void:
 	#current_move = moves["idle"]
 	#switch_to("idle")
 
-func _physics_process(delta):
+func _physics_process(_delta: float) -> void:
 	pass
 	#var verdict = current_move.check_transition(delta)
 	#if verdict[0]:
 		#switch_to(verdict[1])
 	#current_move.update(delta)
 
-func switch_to(next_state_name : String):
+func switch_to(next_state_name : String) -> void:
 	current_move.on_exit()
 	current_move = moves[next_state_name]
 	current_move.mark_enter_state()
 	current_move.on_enter()
 	#animation_player.play(current_move.animation)
 
-func collect_states():
+func collect_states() -> void:
 	for child in get_children():
 		if child is PlayerMove:
 			moves[child.move_name] = child

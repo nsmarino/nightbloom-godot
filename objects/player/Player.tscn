@@ -58,9 +58,8 @@ volume_db = 1.0
 stream = ExtResource("4_seukq")
 volume_db = 1.0
 
-[node name="Resources" type="Node" parent="." node_paths=PackedStringArray("state_machine")]
+[node name="Resources" type="Node" parent="."]
 script = ExtResource("5_seukq")
-state_machine = NodePath("../StateMachine")
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("player", "resources")]
 script = ExtResource("6_sderm")

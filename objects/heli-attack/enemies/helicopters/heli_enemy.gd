@@ -7,7 +7,7 @@ class_name HeliEnemy
 @onready var Sprite: Sprite3D = $Visuals/HeliSprite
 @onready var HUD: Sprite3D = $Visuals/HUD
 @onready var ParticlesDeath: GPUParticles3D = $Visuals/ParticlesDeath
-@onready var Collider = $Collider
+@onready var Collider: CollisionShape3D = $Collider
 
 func _ready() -> void:
 	_instance_weapon()
@@ -16,7 +16,7 @@ func _instance_weapon() -> void:
 	var weapon := weapon_scene.instantiate() as BaseWeapon
 	WeaponSocket.add_child(weapon)
 	
-func _process(delta: float) -> void:
-	var target = Vector3(player.global_position.x, player.global_position.y+1, player.global_position.z)
+func _process(_delta: float) -> void:
+	var target: Vector3 = Vector3(player.global_position.x, player.global_position.y+1, player.global_position.z)
 	if (WeaponSocket): WeaponSocket.look_at(target)
 	

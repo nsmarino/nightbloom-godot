@@ -11,27 +11,27 @@ var resources : PlayerResources
 
 var enter_state_time : float
 
-func check_transition(delta) -> Array:
+func check_transition(_delta: float) -> Array:
 	return [true, "implement transition logic for " + move_name]
 
 
-func update(delta):
+func update(_delta: float) -> void:
 	pass
  
 
-func on_enter():
+func on_enter() -> void:
 	pass
 
 
-func on_exit():
+func on_exit() -> void:
 	pass
 
 # our little timestamps framework to work with timings inside our logic
-func mark_enter_state():
+func mark_enter_state() -> void:
 	enter_state_time = Time.get_unix_time_from_system()
 
 func get_progress() -> float:
-	var now = Time.get_unix_time_from_system()
+	var now: float = Time.get_unix_time_from_system()
 	return now - enter_state_time
 
 func duration_longer_than(time : float) -> bool:
@@ -45,7 +45,7 @@ func duration_less_than(time : float) -> bool:
 	return false
 
 func duration_between(start : float, finish : float) -> bool:
-	var progress = get_progress()
+	var progress: float = get_progress()
 	if progress >= start and progress <= finish:
 		return true
 	return false

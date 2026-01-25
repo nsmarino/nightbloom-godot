@@ -1,13 +1,13 @@
 [gd_scene load_steps=13 format=3 uid="uid://xlty00h35sj3"]
 
-[ext_resource type="PackedScene" uid="uid://bd8r7y86qb4rc" path="res://objects/heli-attack/enemies/base/BaseEnemy.tscn" id="1_4ed5n"]
+[ext_resource type="PackedScene" uid="uid://bd8r7y86qb4rc" path="res://objects/nightbloom/combat/enemy/base/BaseEnemy.tscn" id="1_4ed5n"]
 [ext_resource type="Script" uid="uid://dml7kspal1cqa" path="res://objects/heli-attack/enemies/helicopters/heli_enemy.gd" id="2_iqu6e"]
 [ext_resource type="PackedScene" uid="uid://bje10nqh8qh68" path="res://objects/heli-attack/weapons/heli_weapon.tscn" id="3_1k0o0"]
 [ext_resource type="Texture2D" uid="uid://c7hodtymkcx6u" path="res://sprites/ui/HealthUnder.png" id="4_d7lu2"]
 [ext_resource type="Texture2D" uid="uid://1hxlak5iye8l" path="res://sprites/ui/Health.png" id="5_eo0o4"]
 [ext_resource type="Texture2D" uid="uid://cx5uvm10dds0q" path="res://sprites/heli.png" id="6_8bbjs"]
 [ext_resource type="Script" uid="uid://b2s2kuq33hcud" path="res://objects/heli-attack/enemies/helicopters/patrol.gd" id="6_eo0o4"]
-[ext_resource type="Script" uid="uid://boon727htg0x4" path="res://objects/heli-attack/enemies/base/AIMove.gd" id="7_8bbjs"]
+[ext_resource type="Script" uid="uid://boon727htg0x4" path="res://objects/nightbloom/combat/enemy/base/AIMove.gd" id="7_8bbjs"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8bbjs"]
 height = 3.0
