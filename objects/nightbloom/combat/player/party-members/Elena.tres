@@ -8,7 +8,7 @@
 [sub_resource type="Resource" id="Resource_byyns"]
 script = ExtResource("1_fnplg")
 name = "attack_1"
-animation = "attack_1"
+animation = "Combo1"
 start_particle_fx = "start_1"
 contact_particle_fx = "contact_1"
 attack_power = "20"
@@ -18,5 +18,7 @@ metadata/_custom_type_script = "uid://cmaxr3mmur56t"
 script = ExtResource("3_i2cu1")
 display_name = &"Elena"
 character_scene = ExtResource("2_l5koh")
+anim_locomotion = "RUN"
+anim_receive_hit = "HitReact"
 attacks = Array[ExtResource("1_fnplg")]([SubResource("Resource_byyns")])
 metadata/_custom_type_script = "uid://bw2s1pyxu4qyc"

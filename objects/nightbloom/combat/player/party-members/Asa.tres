@@ -8,7 +8,7 @@
 [sub_resource type="Resource" id="Resource_byyns"]
 script = ExtResource("1_nmhyi")
 name = "asa_attack"
-animation = "asa_attack"
+animation = "Combo1"
 start_particle_fx = "start_1"
 contact_particle_fx = "contact_1"
 attack_power = "30"
@@ -18,5 +18,7 @@ metadata/_custom_type_script = "uid://cmaxr3mmur56t"
 script = ExtResource("3_f0lgt")
 display_name = &"Asa"
 character_scene = ExtResource("2_4adyi")
+anim_locomotion = "RUN"
+anim_receive_hit = "HitReact"
 attacks = Array[ExtResource("1_nmhyi")]([SubResource("Resource_byyns")])
 metadata/_custom_type_script = "uid://bw2s1pyxu4qyc"

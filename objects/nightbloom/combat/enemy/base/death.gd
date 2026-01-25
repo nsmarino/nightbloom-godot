@@ -5,13 +5,6 @@ extends AIState
 
 
 func on_enter() -> void:
-	#Events.helicopter_destroyed.emit(character.global_position)
-	#character.player.Resources.gain_money(200)
-	#character.Sprite.visible = false
-	#character.HUD.visible = false
-	#character.ParticlesDeath.emitting = true	
-	#character.Collider.queue_free()
-	#character.WeaponSocket.queue_free()
 	pass
 	
 

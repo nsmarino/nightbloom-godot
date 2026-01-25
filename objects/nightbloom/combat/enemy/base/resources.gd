@@ -12,17 +12,17 @@ func _ready() -> void:
 	health_bar.value = health
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	pass
 
-func lose_health(amount : float):
+func lose_health(amount : float) -> void:
 	health -= amount
 	if health < 1:
 		state_machine.switch_to("death")
 	health_bar.value = health
 
 
-func gain_health(amount : float):
+func gain_health(amount : float) -> void:
 	if health + amount <= max_health:
 		health += amount
 	else:

@@ -26,8 +26,6 @@ texture = SubResource("ViewportTexture_df3nx")
 [node name="SubViewport" type="SubViewport" parent="Visuals"]
 size = Vector2i(20, 20)
 
-[node name="WeaponSocket" type="Marker3D" parent="."]
-
 [node name="Resources" type="Node" parent="." node_paths=PackedStringArray("state_machine")]
 script = ExtResource("2_2hatd")
 state_machine = NodePath("../StateMachine")
