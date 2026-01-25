@@ -1,0 +1,144 @@
+[gd_scene load_steps=5 format=3 uid="uid://vxdor5xmvcxb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p1lem"]
+bg_color = Color(0.89218223, 0.024072282, 5.7756904e-07, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jm4tr"]
+bg_color = Color(0.999497, 0.69023764, 0.28304455, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jg16a"]
+bg_color = Color(1, 0.6901961, 0.28235295, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1laq"]
+bg_color = Color(1, 0.6901961, 0.28235295, 1)
+
+[node name="CombatHud" type="CanvasLayer"]
+
+[node name="PlayerResourcesLeft" type="BoxContainer" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = -104.0
+offset_right = 512.0
+offset_bottom = -64.0
+grow_vertical = 0
+
+[node name="PlayerHealth" type="ProgressBar" parent="PlayerResourcesLeft"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/background = SubResource("StyleBoxFlat_p1lem")
+show_percentage = false
+
+[node name="PlayerResourcesRight" type="BoxContainer" parent="."]
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -64.0
+offset_bottom = -87.0
+grow_horizontal = 0
+grow_vertical = 2
+alignment = 2
+vertical = true
+
+[node name="Action1" type="Control" parent="PlayerResourcesRight"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="ProgressAction1" type="ProgressBar" parent="PlayerResourcesRight/Action1"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_styles/fill = SubResource("StyleBoxFlat_jm4tr")
+max_value = 30.0
+step = 5.0
+value = 15.0
+fill_mode = 3
+show_percentage = false
+
+[node name="Action2" type="Control" parent="PlayerResourcesRight"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="ProgressAction2" type="ProgressBar" parent="PlayerResourcesRight/Action2"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_styles/fill = SubResource("StyleBoxFlat_jg16a")
+max_value = 30.0
+step = 5.0
+value = 15.0
+fill_mode = 3
+show_percentage = false
+
+[node name="Action3" type="Control" parent="PlayerResourcesRight"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="ProgressAction3" type="ProgressBar" parent="PlayerResourcesRight/Action3"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_styles/fill = SubResource("StyleBoxFlat_y1laq")
+max_value = 30.0
+step = 5.0
+value = 15.0
+fill_mode = 3
+show_percentage = false
+
+[node name="EnemyResources" type="BoxContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -397.58002
+offset_top = 22.08
+offset_right = -22.579834
+offset_bottom = 62.08
+grow_horizontal = 0
+
+[node name="EnemyHealth" type="ProgressBar" parent="EnemyResources"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/background = SubResource("StyleBoxFlat_p1lem")
+show_percentage = false
+
+[node name="TurnBar" type="ProgressBar" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -48.0
+offset_right = -12.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+value = 50.0
+show_percentage = false
+
+[node name="DecideMenu" type="BoxContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -338.0
+offset_top = -252.0
+offset_right = -92.0
+offset_bottom = -101.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="ColorRect" type="ColorRect" parent="DecideMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.6297863, 0.98518914, 0.83447963, 1)

@@ -1,0 +1,84 @@
+[gd_scene load_steps=10 format=3 uid="uid://bwwp0m3lati7b"]
+
+[ext_resource type="Script" uid="uid://btuqye0wqmpx8" path="res://objects/nightbloom/combat/player/pawn.gd" id="1_bjoli"]
+[ext_resource type="Script" uid="uid://bu4xqguews7s3" path="res://objects/nightbloom/combat/player/group_resources.gd" id="1_ymrwf"]
+[ext_resource type="Script" uid="uid://cnybiix36i07x" path="res://objects/nightbloom/combat/player/state_machine.gd" id="2_dwpfp"]
+[ext_resource type="Script" uid="uid://bw2s1pyxu4qyc" path="res://objects/nightbloom/combat/player/PartyMemberData.gd" id="2_hofpl"]
+[ext_resource type="Script" uid="uid://dvxte1m8i07t4" path="res://objects/nightbloom/combat/player/Idle.gd" id="3_73162"]
+[ext_resource type="Resource" uid="uid://b8vvj8qtt0l5d" path="res://objects/nightbloom/combat/player/party-members/Elena.tres" id="3_md8lp"]
+[ext_resource type="Resource" uid="uid://boypslk8qbfdk" path="res://objects/nightbloom/combat/player/party-members/Asa.tres" id="4_hofpl"]
+[ext_resource type="Script" uid="uid://cpmyru3xvfv0j" path="res://objects/nightbloom/combat/player/PlayerState.gd" id="5_gn4wn"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_c5u67"]
+
+[node name="Pawn" type="CharacterBody3D"]
+script = ExtResource("1_bjoli")
+PartyMembers = Array[ExtResource("2_hofpl")]([ExtResource("3_md8lp"), ExtResource("4_hofpl")])
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_c5u67")
+
+[node name="GroupResources" type="Node" parent="."]
+script = ExtResource("1_ymrwf")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("pawn", "group_resources")]
+script = ExtResource("2_dwpfp")
+pawn = NodePath("..")
+group_resources = NodePath("../GroupResources")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("3_73162")
+state_name = "idle"
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="Locomotion" type="Node" parent="StateMachine"]
+script = ExtResource("5_gn4wn")
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("5_gn4wn")
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="DecideMenu" type="Node" parent="StateMachine"]
+script = ExtResource("5_gn4wn")
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="Spell" type="Node" parent="StateMachine"]
+script = ExtResource("5_gn4wn")
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="Item" type="Node" parent="StateMachine"]
+script = ExtResource("5_gn4wn")
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="Victory" type="Node" parent="StateMachine"]
+script = ExtResource("5_gn4wn")
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="Defeat" type="Node" parent="StateMachine"]
+script = ExtResource("5_gn4wn")
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="LocomotionSlow" type="Node" parent="StateMachine"]
+script = ExtResource("5_gn4wn")
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="ReceiveAttack" type="Node" parent="StateMachine"]
+script = ExtResource("5_gn4wn")
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="Vulnerable" type="Node" parent="StateMachine"]
+script = ExtResource("5_gn4wn")
+metadata/_custom_type_script = "uid://cpmyru3xvfv0j"
+
+[node name="SoundFX" type="Node" parent="."]
+
+[node name="ParticleFX" type="Node" parent="."]
+
+[node name="SpringArm3D" type="SpringArm3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.8660254, 0.5, 0, -0.5, 0.8660254, 0, 2, 0)
+spring_length = 15.0
+
+[node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
+fov = 40.0

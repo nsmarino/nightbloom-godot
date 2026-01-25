@@ -1,7 +1,6 @@
 extends CharacterBody3D
 class_name BaseEnemy
 
-@export var player : CharacterBody3D
 @export var speed : float = 3
 
 @onready var Resources = $Resources

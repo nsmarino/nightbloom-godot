@@ -1,4 +1,4 @@
-extends AIMove
+extends AIState
 
 func update(delta):
 	pass

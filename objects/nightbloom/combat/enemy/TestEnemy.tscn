@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://qf36lalaqa4l"]
+
+[ext_resource type="PackedScene" uid="uid://bd8r7y86qb4rc" path="res://objects/nightbloom/combat/enemy/base/BaseEnemy.tscn" id="1_1v4xo"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_ra87o"]
+viewport_path = NodePath("Visuals/SubViewport")
+
+[node name="BaseEnemy" instance=ExtResource("1_1v4xo")]
+
+[node name="HUD" parent="Visuals" index="0"]
+texture = SubResource("ViewportTexture_ra87o")

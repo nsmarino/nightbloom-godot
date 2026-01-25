@@ -1,4 +1,4 @@
-extends AIMove
+extends AIState
 
 @export var base_speed: float = 6.0
 @export var patrol_distance: float = 10.0

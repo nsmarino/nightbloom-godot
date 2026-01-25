@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://1hxlak5iye8l" path="res://sprites/ui/Health.png" id="5_eo0o4"]
 [ext_resource type="Texture2D" uid="uid://cx5uvm10dds0q" path="res://sprites/heli.png" id="6_8bbjs"]
 [ext_resource type="Script" uid="uid://b2s2kuq33hcud" path="res://objects/heli-attack/enemies/helicopters/patrol.gd" id="6_eo0o4"]
-[ext_resource type="Script" uid="uid://boon727htg0x4" path="res://objects/nightbloom/combat/enemy/base/AIMove.gd" id="7_8bbjs"]
+[ext_resource type="Script" uid="uid://boon727htg0x4" path="res://objects/nightbloom/combat/enemy/base/AIState.gd" id="7_8bbjs"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8bbjs"]
 height = 3.0
