@@ -1,21 +1,103 @@
 extends Node
 class_name GroupResources
 
-@export var max_hp : int = 100
-@export var hp : int = 100
-@export var max_mp : int = 20
-@export var mp : int = 20
-@export var max_ap : int = 90
-@export var ap : int = 0
+# AP cost constants
+const SPELL_COST: int = 30
+const ITEM_COST: int = 15
+const SWITCH_COST: int = 15
+const GUARD_COST: int = 15
+const AP_GAIN_ON_HIT: int = 5
 
-# add signals here:
+@export var max_hp: int = 100
+@export var hp: int = 100
+@export var max_mp: int = 20
+@export var mp: int = 20
+@export var max_ap: int = 90
+@export var ap: int = 0
+
+# Guard state
+var is_guarding: bool = false
+var vulnerable_multiplier: float = 1.5
+var guard_damage_reduction: float = 0.5
 
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+	# Emit initial values
+	Events.player_hp_changed.emit(hp, max_hp)
+	Events.player_mp_changed.emit(mp, max_mp)
+	Events.player_ap_changed.emit(ap, max_ap)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	pass
+func take_damage(amount: int) -> void:
+	var actual_damage: int = amount
+	
+	if is_guarding:
+		actual_damage = int(float(amount) * guard_damage_reduction)
+	
+	hp = max(0, hp - actual_damage)
+	Events.player_damaged.emit(actual_damage)
+	Events.player_hp_changed.emit(hp, max_hp)
+
+
+func take_damage_vulnerable(amount: int) -> void:
+	var actual_damage: int = int(float(amount) * vulnerable_multiplier)
+	hp = max(0, hp - actual_damage)
+	Events.player_damaged.emit(actual_damage)
+	Events.player_hp_changed.emit(hp, max_hp)
+
+
+func heal(amount: int) -> void:
+	hp = min(max_hp, hp + amount)
+	Events.player_hp_changed.emit(hp, max_hp)
+
+
+func gain_ap(amount: int) -> void:
+	ap = min(max_ap, ap + amount)
+	Events.player_ap_changed.emit(ap, max_ap)
+
+
+func spend_ap(amount: int) -> bool:
+	if ap >= amount:
+		ap -= amount
+		Events.player_ap_changed.emit(ap, max_ap)
+		return true
+	return false
+
+
+func can_afford_ap(amount: int) -> bool:
+	return ap >= amount
+
+
+func spend_mp(amount: int) -> bool:
+	if mp >= amount:
+		mp -= amount
+		Events.player_mp_changed.emit(mp, max_mp)
+		return true
+	return false
+
+
+func can_afford_mp(amount: int) -> bool:
+	return mp >= amount
+
+
+func restore_mp(amount: int) -> void:
+	mp = min(max_mp, mp + amount)
+	Events.player_mp_changed.emit(mp, max_mp)
+
+
+func set_guarding(guarding: bool) -> void:
+	is_guarding = guarding
+
+
+func is_defeated() -> bool:
+	return hp <= 0
+
+
+func reset_for_combat() -> void:
+	hp = max_hp
+	mp = max_mp
+	ap = 0
+	is_guarding = false
+	Events.player_hp_changed.emit(hp, max_hp)
+	Events.player_mp_changed.emit(mp, max_mp)
+	Events.player_ap_changed.emit(ap, max_ap)

@@ -1,46 +1,67 @@
-[gd_scene load_steps=8 format=3 uid="uid://bd8r7y86qb4rc"]
+[gd_scene load_steps=11 format=3 uid="uid://bd8r7y86qb4rc"]
 
-[ext_resource type="Script" uid="uid://csh12l2edgbs2" path="res://objects/nightbloom/combat/enemy/base/base_enemy.gd" id="1_o17yj"]
-[ext_resource type="Script" uid="uid://ctg5mqi46axre" path="res://objects/nightbloom/combat/enemy/base/resources.gd" id="2_2hatd"]
-[ext_resource type="Script" uid="uid://b2i4t4wksl03j" path="res://objects/nightbloom/combat/enemy/base/state_machine.gd" id="3_7vwvv"]
-[ext_resource type="Script" uid="uid://ce1tx8horh1jo" path="res://objects/nightbloom/combat/enemy/base/idle.gd" id="4_df3nx"]
-[ext_resource type="Script" uid="uid://d2dd0pw30wnyd" path="res://objects/nightbloom/combat/enemy/base/death.gd" id="5_df3nx"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/base_enemy.gd" id="1_enemy"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/state_machine.gd" id="2_statemachine"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/idle.gd" id="3_idle"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/locomotion_slow.gd" id="4_locomotion_slow"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/pursue.gd" id="5_pursue"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/attack.gd" id="6_attack"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/evade.gd" id="7_evade"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/receive_attack.gd" id="8_receive_attack"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/death.gd" id="9_death"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_58u0u"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_collider"]
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_df3nx"]
-viewport_path = NodePath("Visuals/SubViewport")
+[sub_resource type="SphereShape3D" id="SphereShape3D_attack"]
+radius = 1.5
 
 [node name="BaseEnemy" type="CharacterBody3D" groups=["enemy"]]
-script = ExtResource("1_o17yj")
+script = ExtResource("1_enemy")
 
 [node name="Collider" type="CollisionShape3D" parent="."]
-shape = SubResource("CapsuleShape3D_58u0u")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_collider")
 
-[node name="Visuals" type="Node3D" parent="."]
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.5
+target_desired_distance = 1.0
 
-[node name="HUD" type="Sprite3D" parent="Visuals"]
-billboard = 1
-texture = SubResource("ViewportTexture_df3nx")
+[node name="AttackArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1.5)
+monitoring = false
+monitorable = false
 
-[node name="SubViewport" type="SubViewport" parent="Visuals"]
-size = Vector2i(20, 20)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackArea"]
+shape = SubResource("SphereShape3D_attack")
 
-[node name="Resources" type="Node" parent="." node_paths=PackedStringArray("state_machine")]
-script = ExtResource("2_2hatd")
-state_machine = NodePath("../StateMachine")
-
-[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("character", "resources")]
-script = ExtResource("3_7vwvv")
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("character")]
+script = ExtResource("2_statemachine")
 character = NodePath("..")
-resources = NodePath("../Resources")
 
 [node name="Idle" type="Node" parent="StateMachine"]
-script = ExtResource("4_df3nx")
-move_name = "idle"
-metadata/_custom_type_script = "uid://boon727htg0x4"
+script = ExtResource("3_idle")
+state_name = "idle"
+
+[node name="LocomotionSlow" type="Node" parent="StateMachine"]
+script = ExtResource("4_locomotion_slow")
+state_name = "locomotion_slow"
+
+[node name="Pursue" type="Node" parent="StateMachine"]
+script = ExtResource("5_pursue")
+state_name = "pursue"
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("6_attack")
+state_name = "attack"
+
+[node name="Evade" type="Node" parent="StateMachine"]
+script = ExtResource("7_evade")
+state_name = "evade"
+
+[node name="ReceiveAttack" type="Node" parent="StateMachine"]
+script = ExtResource("8_receive_attack")
+state_name = "receive_attack"
 
 [node name="Death" type="Node" parent="StateMachine"]
-script = ExtResource("5_df3nx")
-move_name = "death"
-metadata/_custom_type_script = "uid://boon727htg0x4"
+script = ExtResource("9_death")
+state_name = "death"

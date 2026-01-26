@@ -1,10 +1,21 @@
-[gd_scene load_steps=9 format=3 uid="uid://dhhhxikvujens"]
+[gd_scene load_steps=11 format=3 uid="uid://dhhhxikvujens"]
 
-[ext_resource type="Environment" uid="uid://ddo455a1peyhr" path="res://levels/main-environment.tres" id="1_ubfh8"]
 [ext_resource type="Script" uid="uid://c1jp2vi6jyt1a" path="res://objects/nightbloom/combat/combat_manager.gd" id="1_vb544"]
 [ext_resource type="PackedScene" uid="uid://bwwp0m3lati7b" path="res://objects/nightbloom/combat/player/Pawn.tscn" id="2_vb544"]
 [ext_resource type="PackedScene" uid="uid://vxdor5xmvcxb" path="res://objects/nightbloom/combat/hud/CombatHud.tscn" id="3_s8irp"]
 [ext_resource type="PackedScene" uid="uid://g6ifp62rjk87" path="res://objects/nightbloom/combat/enemy/EnemyGroup.tscn" id="5_p17xp"]
+[ext_resource type="Script" uid="uid://be3ojgxjdeih1" path="res://levels/arena_controller.gd" id="6_arena"]
+[ext_resource type="Script" uid="uid://dcgac1l8pglxk" path="res://levels/follow_camera.gd" id="7_camera"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_65vf4"]
+vertices = PackedVector3Array(-19.5, 0.10000008, -13, -19.5, 0.10000008, 26, 19.5, 0.10000008, 26, 19.5, 0.10000008, -13)
+polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
+geometry_parsed_geometry_type = 1
+cell_height = 0.05
+agent_height = 2.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(40, 1, 40)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_olpmc"]
 albedo_color = Color(0.39118537, 0.39118534, 0.39118534, 1)
@@ -13,16 +24,21 @@ albedo_color = Color(0.39118537, 0.39118534, 0.39118534, 1)
 material = SubResource("StandardMaterial3D_olpmc")
 size = Vector2(40, 40)
 
-[sub_resource type="BoxMesh" id="BoxMesh_7ft05"]
-size = Vector3(3, 3, 3)
-
 [node name="Arena" type="Node3D"]
+script = ExtResource("6_arena")
 
 [node name="CombatManager" type="Node" parent="."]
 script = ExtResource("1_vb544")
 
 [node name="Pawn" parent="." instance=ExtResource("2_vb544")]
-transform = Transform3D(-1, 0, -1.1920929e-07, 0, 1, 0, 1.1920929e-07, 0, -1, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+
+[node name="FollowCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.83205, 0.5547, 0, -0.5547, 0.83205, 0, 12, 8)
+current = true
+fov = 50.0
+script = ExtResource("7_camera")
+target_path = NodePath("../Pawn")
 
 [node name="HUD" type="Node" parent="."]
 
@@ -32,161 +48,18 @@ transform = Transform3D(-1, 0, -1.1920929e-07, 0, 1, 0, 1.1920929e-07, 0, -1, 0,
 
 [node name="Ground" type="Node" parent="Level"]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Level/Ground"]
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="Level/Ground"]
+navigation_mesh = SubResource("NavigationMesh_65vf4")
+
+[node name="FloorBody" type="StaticBody3D" parent="Level/Ground/NavigationRegion3D"]
+
+[node name="FloorCollider" type="CollisionShape3D" parent="Level/Ground/NavigationRegion3D/FloorBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 6.5)
+shape = SubResource("BoxShape3D_floor")
+
+[node name="FloorMesh" type="MeshInstance3D" parent="Level/Ground/NavigationRegion3D/FloorBody"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.5)
 mesh = SubResource("PlaneMesh_xdvfk")
-
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0, 0)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, -9.5, -0.5, 3)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D4" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.8660254, 0, -0.5, 0, 1, 0, 0.5, 0, 0.8660254, -7.75, 0, -5.799038)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D5" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, -9.25, -0.5, -3.200962)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D6" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-0.50000006, 0, -0.8660254, 0, 1, 0, 0.8660254, 0, -0.50000006, -2.200962, 0, -3.75)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D7" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.49999997, 0, -0.8660254, 0, 1, 0, 0.8660254, 0, 0.49999997, -4.799038, -0.5, -5.25)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D8" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-5.9604645e-08, 0, -1, 0, 1, 0, 1, 0, -5.9604645e-08, 3.5, 0, -4.5)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D9" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.8660253, 0, -0.5, 0, 1, 0, 0.5, 0, 0.8660253, 0.5, -0.5, -4.5)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D10" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-0.50000006, 0, -0.8660253, 0, 1, 0, 0.8660253, 0, -0.50000006, 8.299038, 0, -1.75)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D11" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.49999994, 0, -0.8660253, 0, 1, 0, 0.8660253, 0, 0.49999994, 5.700962, -0.5, -3.25)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D12" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-1, 0, 2.0861626e-07, 0, 1, 0, -2.0861626e-07, 0, -1, 8.5, 0, 4)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D13" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-0.50000006, 0, -0.86602527, 0, 1, 0, 0.86602527, 0, -0.50000006, 8.5, -0.5, 1.0000001)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D14" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 8.166666, 0, 10.000001)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D15" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-0.50000006, 0, -0.8660254, 0, 1, 0, 0.8660254, 0, -0.50000006, 8.166666, -0.5, 7.000001)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D16" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-0.8660253, 0, 0.50000006, 0, 1, 0, -0.50000006, 0, -0.8660253, 6.4166665, 0, 15.799039)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D17" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-0.86602545, 0, -0.4999999, 0, 1, 0, 0.4999999, 0, -0.86602545, 7.9166665, -0.5, 13.200963)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D18" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.5000001, 0, 0.8660253, 0, 1, 0, -0.8660253, 0, 0.5000001, 0.8676285, 0, 13.75)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D26" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(2.0000002, 0, 3.4641016, 1.7320508, 3.4641016, -1.0000001, -3, 2, 1.732051, 0.8676285, 0, 24.75)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D27" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-1.2990382, -1.5, 2.2499998, -0.75000006, 2.598076, 1.299038, -2.598076, 0, -1.5000001, -10.132372, 0, 23.5)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D28" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.23205113, 1, 3.8660254, 1.7320509, 3.4641016, -1.0000001, -3.5980763, 1.7320508, -0.23205066, 19.943268, 0, 20.916265)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D29" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-2.424038, -1.299038, 1.1985569, -0.7500002, 2.5980763, 1.2990382, -1.6004808, 0.74999994, -2.424038, 9.791988, 0, 25.333735)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D30" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(3.2320514, -0.99999994, 2.1339743, 1.7320509, 3.4641016, -1.0000001, -1.5980759, 1.7320509, 3.2320511, 19.318268, 0, -9.0837345)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D31" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.17403841, -1.2990379, 2.698557, -0.75, 2.598076, 1.2990382, -2.8995187, -0.7500002, -0.17403805, 10.416988, 0, -15.6662655)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D32" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.23205125, 1.0000002, 3.8660257, 1.7320509, 3.4641016, -1.0000001, -3.5980766, 1.7320509, -0.23205054, -1.5567327, 0, -15.5837345)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D33" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-2.4240375, -1.2990379, 1.1985569, -0.7499998, 2.5980759, 1.2990379, -1.6004807, 0.7499995, -2.4240375, -11.708012, 0, -11.1662655)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D34" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(2.9999995, -1.9999999, -1.7320511, 1.7320507, 3.4641016, -1.0000001, 2.0000005, 2.3841858e-07, 3.464101, -22.257372, 0, 4.625)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D35" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(2.5980756, 4.172325e-07, 1.4999993, -0.7499998, 2.5980759, 1.299038, -1.2990376, -1.4999998, 2.2499995, -21.007372, 0, -6.375)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D36" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(2.9999995, -1.9999999, -1.7320511, 1.7320507, 3.4641016, -1.0000001, 2.0000005, 2.3841858e-07, 3.464101, -22.257372, 0, 23.125)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D37" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(2.5980756, 4.172325e-07, 1.4999993, -0.7499998, 2.5980759, 1.299038, -1.2990376, -1.4999998, 2.2499995, -21.007372, 0, 12.125)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D38" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(2.9999995, -1.9999999, -1.7320511, 1.7320507, 3.4641016, -1.0000001, 2.0000005, 2.3841858e-07, 3.464101, 20.742628, 0, 10.625)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D39" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(2.5980756, 4.172325e-07, 1.4999993, -0.7499998, 2.5980759, 1.299038, -1.2990376, -1.4999998, 2.2499995, 21.992628, 0, -0.375)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D19" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-0.49999988, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, -0.49999988, 3.4657042, -0.5, 15.25)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D20" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(1.4702742e-07, 0, 1, 0, 1, 0, -1, 0, 1.4702742e-07, -4.833333, 0, 14.5)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D21" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-0.86602527, 0, 0.50000006, 0, 1, 0, -0.50000006, 0, -0.86602527, -1.8333337, -0.5, 14.5)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D22" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.50000024, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, 0.50000024, -9.632372, 0, 11.749999)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D23" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(-0.49999985, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.49999985, -7.034295, -0.5, 13.25)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D24" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(1, 0, -2.9603905e-07, 0, 1, 0, 2.9603905e-07, 0, 1, -9.833333, 0, 5.999999)
-mesh = SubResource("BoxMesh_7ft05")
-
-[node name="MeshInstance3D25" type="MeshInstance3D" parent="Level/Ground"]
-transform = Transform3D(0.5000001, 0, 0.8660252, 0, 1, 0, -0.8660252, 0, 0.5000001, -9.833334, -0.5, 8.999999)
-mesh = SubResource("BoxMesh_7ft05")
 
 [node name="Lighting" type="Node" parent="."]
 
@@ -194,9 +67,6 @@ mesh = SubResource("BoxMesh_7ft05")
 transform = Transform3D(-0.50000006, -0.4330127, 0.75, -2.1855694e-08, 0.8660254, 0.5, -0.8660254, 0.25, -0.43301272, 0, 0, 0)
 light_color = Color(0.9999998, 0.989737, 0.87402666, 1)
 shadow_enabled = true
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = ExtResource("1_ubfh8")
 
 [node name="EnemySpawns" type="Node" parent="."]
 

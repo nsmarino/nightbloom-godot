@@ -1,38 +1,123 @@
 extends Node
-@export var pawn : CharacterBody3D
-#@export var animation_player : AnimationPlayer
-@export var group_resources : GroupResources
-@export var default_move: String = "idle"
+class_name PlayerStateMachine
 
-var states : Dictionary # { String : PlayerState }
-var current_state : PlayerState
+@export var pawn: CharacterBody3D
+@export var group_resources: Node
+@export var default_state: String = "idle"
 
-# Called when the node enters the scene tree for the first time.
+var states: Dictionary
+var current_state: Node
+var animator: AnimationPlayer
+var hit_area: Area3D
+var enemy_group: Node
+
+
 func _ready() -> void:
-	pass
-	#collect_states()
-	#current_move = moves["idle"]
-	#switch_to("idle")
+	await get_tree().process_frame
+	
+	collect_states()
+	
+	if states.has(default_state):
+		current_state = states[default_state]
+		current_state.mark_enter_state()
+		current_state.on_enter()
+	
+	Events.turn_started.connect(_on_turn_started)
+	Events.turn_ended.connect(_on_turn_ended)
+	Events.combat_ended.connect(_on_combat_ended)
 
-func _physics_process(_delta: float) -> void:
-	pass
-	#var verdict = current_move.check_transition(delta)
-	#if verdict[0]:
-		#switch_to(verdict[1])
-	#current_move.update(delta)
 
-func switch_to(next_state_name : String) -> void:
-	current_state.on_exit()
+func _physics_process(delta: float) -> void:
+	if current_state == null:
+		return
+	
+	var verdict: Array = current_state.check_transition(delta)
+	if verdict[0]:
+		switch_to(verdict[1])
+	
+	current_state.update(delta)
+
+
+func switch_to(next_state_name: String) -> void:
+	if not states.has(next_state_name):
+		push_warning("PlayerStateMachine: State not found: " + next_state_name)
+		return
+	
+	if current_state:
+		current_state.on_exit()
+	
 	current_state = states[next_state_name]
 	current_state.mark_enter_state()
 	current_state.on_enter()
-	#animation_player.play(current_move.animation)
+
+
+func force_switch_to(next_state_name: String) -> void:
+	switch_to(next_state_name)
+
 
 func collect_states() -> void:
 	for child in get_children():
 		if child is PlayerState:
 			states[child.state_name] = child
-			#child.animator = animation_player
 			child.pawn = pawn
-			child.spawn_point = pawn.spawn_point
+			child.spawn_point = pawn.global_position
 			child.group_resources = group_resources
+			child.animator = animator
+			child.hit_area = hit_area
+			child.enemy_group = enemy_group
+
+
+func set_animator(anim_player: AnimationPlayer) -> void:
+	animator = anim_player
+	for state in states.values():
+		state.animator = animator
+
+
+func set_hit_area(area: Area3D) -> void:
+	hit_area = area
+	for state in states.values():
+		state.hit_area = area
+
+
+func set_enemy_group(group: Node) -> void:
+	enemy_group = group
+	for state in states.values():
+		state.enemy_group = group
+
+
+func _on_turn_started(is_player_turn: bool) -> void:
+	if is_player_turn:
+		if current_state and current_state.state_name != "vulnerable":
+			switch_to("locomotion")
+	else:
+		if current_state and current_state.state_name == "attack":
+			switch_to("vulnerable")
+		elif current_state and current_state.state_name != "guard":
+			switch_to("locomotion_slow")
+
+
+func _on_turn_ended(_is_player_turn: bool) -> void:
+	pass
+
+
+func _on_combat_ended(player_won: bool) -> void:
+	if player_won:
+		switch_to("victory")
+	else:
+		switch_to("defeat")
+
+
+func get_current_state_name() -> String:
+	if current_state:
+		return current_state.state_name
+	return ""
+
+
+func receive_attack(damage: int) -> void:
+	if current_state and current_state.state_name == "vulnerable":
+		group_resources.take_damage_vulnerable(damage)
+	else:
+		group_resources.take_damage(damage)
+	
+	if not group_resources.is_guarding:
+		switch_to("receive_attack")
