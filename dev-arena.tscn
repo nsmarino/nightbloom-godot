@@ -1,0 +1,109 @@
+[gd_scene format=3 uid="uid://bvx22g3c34lpo"]
+
+[ext_resource type="PackedScene" uid="uid://b8dmw5js5lj1x" path="res://models/character/player/combat-player-pawn.glb" id="1_yn2uo"]
+[ext_resource type="Texture2D" uid="uid://dn5as0kkqj33v" path="res://models/Slide 4_3 - 5.png" id="2_sm5ed"]
+[ext_resource type="PackedScene" uid="uid://ddd0k8l1c0uak" path="res://models/level/ground/hammer-rig.blend" id="3_sm5ed"]
+
+[sub_resource type="Environment" id="Environment_sm5ed"]
+background_color = Color(3.85046e-07, 0.32503822, 0.5310734, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.39905745, 0.20786697, 0.15822163, 1)
+ambient_light_energy = 0.41
+tonemap_mode = 3
+tonemap_exposure = 1.12
+fog_light_color = Color(0.45484918, 0.35789856, 0.380946, 1)
+fog_light_energy = 0.5
+fog_density = 0.02
+fog_sky_affect = 0.0
+volumetric_fog_density = 0.02
+volumetric_fog_emission = Color(0.09417594, 0.26516044, 0.3366153, 1)
+volumetric_fog_detail_spread = 1.9999999
+volumetric_fog_sky_affect = 0.0
+adjustment_enabled = true
+adjustment_brightness = 1.08
+adjustment_contrast = 1.015
+adjustment_saturation = 1.38
+
+[sub_resource type="Curve" id="Curve_sm5ed"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.52074397, 0), -5.282868, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_iuhmi"]
+curve = SubResource("Curve_sm5ed")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_sm5ed"]
+lifetime_randomness = 0.1
+particle_flag_disable_z = true
+gravity = Vector3(0, 1, 0)
+scale_min = 0.19999999
+scale_max = 0.39999998
+scale_over_velocity_max = 2.0
+turbulence_enabled = true
+turbulence_noise_strength = 0.08
+turbulence_influence_over_life = SubResource("CurveTexture_iuhmi")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_iuhmi"]
+orientation = 2
+
+[node name="Node3D" type="Node3D" unique_id=1772129665]
+
+[node name="for-scale" type="Node" parent="." unique_id=1664931806]
+
+[node name="combat-player-pawn" parent="for-scale" unique_id=1653730704 instance=ExtResource("1_yn2uo")]
+transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, -2.5, 0, -2)
+
+[node name="combat-player-pawn2" parent="for-scale" unique_id=1343887574 instance=ExtResource("1_yn2uo")]
+transform = Transform3D(0.5, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.5, 1, 0, -1.5)
+
+[node name="combat-player-pawn3" parent="for-scale" unique_id=1734254655 instance=ExtResource("1_yn2uo")]
+transform = Transform3D(-0.86602545, 0, -0.49999997, 0, 1, 0, 0.49999997, 0, -0.86602545, 2.5, 0, 5.5)
+
+[node name="combat-player-pawn4" parent="for-scale" unique_id=2028664028 instance=ExtResource("1_yn2uo")]
+transform = Transform3D(1, 0, -1.4901161e-07, 0, 1, 0, 1.4901161e-07, 0, 1, 1.5, 0, 2.5)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1470533323]
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer" unique_id=577436352]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+texture = ExtResource("2_sm5ed")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1274467862]
+transform = Transform3D(0.79863554, 0.35373798, -0.48687854, 0, 0.809017, 0.58778524, 0.601815, -0.46942618, 0.64610976, 0, 0, 0)
+light_color = Color(0.87296176, 0.76481706, 0.7154657, 1)
+light_energy = 0.1
+shadow_enabled = true
+sky_mode = 1
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=83584314]
+transform = Transform3D(1, 0, 0, 0, 0.90630776, 0.42261827, 0, -0.42261827, 0.90630776, 0.57, 4.95, 10.77)
+fov = 40.0
+
+[node name="hammer-rig" parent="." unique_id=479012037 instance=ExtResource("3_sm5ed")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 2.6445017)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1597344842]
+environment = SubResource("Environment_sm5ed")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=3257617]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.52, 3.85, 3.9899998)
+omni_range = 6.137
+
+[node name="SpotLight3D" type="SpotLight3D" parent="." unique_id=168736394]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.8660254, 0, -0.8660254, 0.5, 0, 9.5, 9)
+light_color = Color(0.9106788, 0.967143, 0.97341603, 1)
+light_energy = 2.149
+shadow_enabled = true
+spot_range = 23.723
+spot_angle = 45.36352
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=1802486926]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+amount = 3
+lifetime = 3.09
+process_material = SubResource("ParticleProcessMaterial_sm5ed")
+draw_pass_1 = SubResource("PlaneMesh_iuhmi")

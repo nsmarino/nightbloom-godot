@@ -87,12 +87,13 @@ func set_enemy_group(group: Node) -> void:
 
 func _on_turn_started(is_player_turn: bool) -> void:
 	if is_player_turn:
-		if current_state and current_state.state_name != "vulnerable":
+		# Don't interrupt vulnerable or receive_attack states
+		if current_state and current_state.state_name not in ["vulnerable", "receive_attack"]:
 			switch_to("locomotion")
 	else:
 		if current_state and current_state.state_name == "attack":
 			switch_to("vulnerable")
-		elif current_state and current_state.state_name != "guard":
+		elif current_state and current_state.state_name not in ["guard", "receive_attack"]:
 			switch_to("locomotion_slow")
 
 

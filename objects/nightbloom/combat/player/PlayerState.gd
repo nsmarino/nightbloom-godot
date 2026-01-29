@@ -2,6 +2,7 @@ extends Node
 class_name PlayerState
 
 @export var state_name: String
+@export var rotation_speed: float = 3.0
 
 var pawn: CharacterBody3D
 var animator: AnimationPlayer
@@ -60,28 +61,36 @@ func get_movement_input() -> Vector2:
 	return input_dir
 
 
-func apply_movement(delta: float, speed: float) -> void:
+func get_rotation_input() -> float:
+	# Right stick horizontal axis for rotation
+	return Input.get_axis("LookLeft", "LookRight")
+
+
+func apply_rotation(delta: float) -> void:
+	# Rotate pawn based on right stick input (horizontal only)
+	var rot_input: float = get_rotation_input()
+	if abs(rot_input) > 0.1:
+		pawn.rotation.y -= rot_input * rotation_speed * delta
+
+
+func apply_movement(_delta: float, speed: float) -> void:
 	var input_dir := get_movement_input()
 	if input_dir.length() > 0.1:
-		# Get camera direction for movement relative to camera
-		var camera: Camera3D = pawn.get_viewport().get_camera_3d()
-		if camera:
-			var cam_basis: Basis = camera.global_transform.basis
-			var forward: Vector3 = -cam_basis.z
-			forward.y = 0
-			forward = forward.normalized()
-			var right: Vector3 = cam_basis.x
-			right.y = 0
-			right = right.normalized()
-			
-			var direction: Vector3 = (right * input_dir.x + forward * -input_dir.y).normalized()
-			pawn.velocity.x = direction.x * speed
-			pawn.velocity.z = direction.z * speed
-			
-			# Rotate to face movement direction
-			if direction.length() > 0.1:
-				var target_rotation: float = atan2(direction.x, direction.z)
-				pawn.rotation.y = lerp_angle(pawn.rotation.y, target_rotation, delta * 10.0)
+		# Movement is relative to the Pawn's facing direction
+		var pawn_basis: Basis = pawn.global_transform.basis
+		# +Z is forward for this pawn setup (camera is at -Z looking at +Z)
+		var forward: Vector3 = pawn_basis.z
+		forward.y = 0
+		forward = forward.normalized()
+		var right: Vector3 = -pawn_basis.x
+		right.y = 0
+		right = right.normalized()
+		
+		# Left stick: X = strafe left/right, Y = forward/backward
+		# input_dir.y is negative when pushing up (MoveForward), so we negate it
+		var direction: Vector3 = (right * input_dir.x + forward * -input_dir.y).normalized()
+		pawn.velocity.x = direction.x * speed
+		pawn.velocity.z = direction.z * speed
 	else:
 		pawn.velocity.x = move_toward(pawn.velocity.x, 0, speed)
 		pawn.velocity.z = move_toward(pawn.velocity.z, 0, speed)

@@ -13,6 +13,15 @@ var spawn_point: Vector3
 var character_instance: Node3D
 var animator: AnimationPlayer
 
+# Orbit data (shared between locomotion_slow and evade states)
+var orbit_center: Vector3 = Vector3.ZERO
+var orbit_radius: float = 10.0
+var orbit_angle: float = 0.0
+var orbit_direction: float = 1.0  # 1.0 = CCW, -1.0 = CW
+
+# Signal when attack cycle is complete (after evade finishes)
+signal attack_cycle_complete
+
 
 func _ready() -> void:
 	spawn_point = global_position
@@ -22,6 +31,10 @@ func _ready() -> void:
 	print("[BaseEnemy:%s] NavAgent: %s" % [name, nav_agent != null])
 	print("[BaseEnemy:%s] StateMachine: %s" % [name, state_machine != null])
 	print("[BaseEnemy:%s] EnemyData: %s" % [name, enemy_data.display_name if enemy_data else "NULL"])
+	
+	# Connect avoidance signal
+	if nav_agent:
+		nav_agent.velocity_computed.connect(_on_velocity_computed)
 	
 	# Spawn character mesh from enemy data
 	if enemy_data and enemy_data.character_scene:
@@ -35,6 +48,12 @@ func _ready() -> void:
 	# Wait a frame then check navigation
 	await get_tree().process_frame
 	_check_navigation_setup()
+
+
+# Called by NavigationAgent3D when avoidance has computed a safe velocity
+func _on_velocity_computed(safe_velocity: Vector3) -> void:
+	velocity = safe_velocity
+	move_and_slide()
 
 
 func _check_navigation_setup() -> void:
@@ -183,3 +202,39 @@ func get_current_state_name() -> String:
 	if state_machine and state_machine.has_method("get_current_state_name"):
 		return state_machine.get_current_state_name()
 	return ""
+
+
+# Orbit helpers - used by locomotion_slow and evade states
+func setup_orbit(center: Vector3, radius: float, direction: float) -> void:
+	orbit_center = center
+	orbit_radius = radius
+	orbit_direction = direction
+	# Calculate current angle based on position
+	var to_self: Vector3 = global_position - orbit_center
+	to_self.y = 0
+	orbit_angle = atan2(to_self.x, to_self.z)
+
+
+func update_orbit_center(new_center: Vector3) -> void:
+	orbit_center = new_center
+	# Recalculate angle based on new center
+	var to_self: Vector3 = global_position - orbit_center
+	to_self.y = 0
+	orbit_angle = atan2(to_self.x, to_self.z)
+
+
+func get_orbit_position() -> Vector3:
+	return Vector3(
+		orbit_center.x + sin(orbit_angle) * orbit_radius,
+		0.0,
+		orbit_center.z + cos(orbit_angle) * orbit_radius
+	)
+
+
+func advance_orbit(delta: float, speed: float) -> void:
+	orbit_angle += orbit_direction * speed * delta
+
+
+func notify_attack_cycle_complete() -> void:
+	print("[BaseEnemy:%s] Attack cycle complete" % name)
+	attack_cycle_complete.emit()

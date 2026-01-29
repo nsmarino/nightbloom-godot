@@ -1,67 +1,76 @@
-[gd_scene load_steps=11 format=3 uid="uid://bd8r7y86qb4rc"]
+[gd_scene format=3 uid="uid://bd8r7y86qb4rc"]
 
-[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/base_enemy.gd" id="1_enemy"]
-[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/state_machine.gd" id="2_statemachine"]
-[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/idle.gd" id="3_idle"]
-[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/locomotion_slow.gd" id="4_locomotion_slow"]
-[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/pursue.gd" id="5_pursue"]
-[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/attack.gd" id="6_attack"]
-[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/evade.gd" id="7_evade"]
-[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/receive_attack.gd" id="8_receive_attack"]
-[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/death.gd" id="9_death"]
+[ext_resource type="Script" uid="uid://csh12l2edgbs2" path="res://objects/nightbloom/combat/enemy/base/base_enemy.gd" id="1_enemy"]
+[ext_resource type="Script" uid="uid://b2i4t4wksl03j" path="res://objects/nightbloom/combat/enemy/base/state_machine.gd" id="2_statemachine"]
+[ext_resource type="Script" uid="uid://cvth8tknxmag7" path="res://objects/nightbloom/combat/enemy/base/states/idle.gd" id="3_idle"]
+[ext_resource type="Script" uid="uid://bapprke5t0a5m" path="res://objects/nightbloom/combat/enemy/base/states/locomotion_slow.gd" id="4_locomotion_slow"]
+[ext_resource type="Script" uid="uid://cr3b2pbxmd7u5" path="res://objects/nightbloom/combat/enemy/base/states/pursue.gd" id="5_pursue"]
+[ext_resource type="Script" uid="uid://baw2qg4pmc53l" path="res://objects/nightbloom/combat/enemy/base/states/attack.gd" id="6_attack"]
+[ext_resource type="Script" uid="uid://c20lyw7iedrn6" path="res://objects/nightbloom/combat/enemy/base/states/evade.gd" id="7_evade"]
+[ext_resource type="Script" uid="uid://dphcinui2mucp" path="res://objects/nightbloom/combat/enemy/base/states/receive_attack.gd" id="8_receive_attack"]
+[ext_resource type="Script" uid="uid://churbt5628ilx" path="res://objects/nightbloom/combat/enemy/base/states/death.gd" id="9_death"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_collider"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_attack"]
 radius = 1.5
 
-[node name="BaseEnemy" type="CharacterBody3D" groups=["enemy"]]
+[node name="BaseEnemy" type="CharacterBody3D" unique_id=1665627281 groups=["enemy"]]
 script = ExtResource("1_enemy")
 
-[node name="Collider" type="CollisionShape3D" parent="."]
+[node name="Collider" type="CollisionShape3D" parent="." unique_id=1704771400]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_collider")
 
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1442980122]
 path_desired_distance = 0.5
-target_desired_distance = 1.0
+avoidance_enabled = true
+radius = 0.6
+neighbor_distance = 5.0
+max_neighbors = 5
 
-[node name="AttackArea" type="Area3D" parent="."]
+[node name="AttackArea" type="Area3D" parent="." unique_id=1067808023]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1.5)
 monitoring = false
 monitorable = false
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackArea"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackArea" unique_id=293187754]
 shape = SubResource("SphereShape3D_attack")
 
-[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("character")]
+[node name="StateMachine" type="Node" parent="." unique_id=1029806317 node_paths=PackedStringArray("character")]
 script = ExtResource("2_statemachine")
 character = NodePath("..")
 
-[node name="Idle" type="Node" parent="StateMachine"]
+[node name="Idle" type="Node" parent="StateMachine" unique_id=1177965530]
 script = ExtResource("3_idle")
 state_name = "idle"
 
-[node name="LocomotionSlow" type="Node" parent="StateMachine"]
+[node name="LocomotionSlow" type="Node" parent="StateMachine" unique_id=1864714343]
 script = ExtResource("4_locomotion_slow")
+speed_multiplier = 0.05
+animation_speed = 0.05
+orbit_radius_variance = 2.0
+orbit_speed = 0.05
 state_name = "locomotion_slow"
 
-[node name="Pursue" type="Node" parent="StateMachine"]
+[node name="Pursue" type="Node" parent="StateMachine" unique_id=739890560]
 script = ExtResource("5_pursue")
 state_name = "pursue"
 
-[node name="Attack" type="Node" parent="StateMachine"]
+[node name="Attack" type="Node" parent="StateMachine" unique_id=723678035]
 script = ExtResource("6_attack")
+fallback_duration = 3.0
 state_name = "attack"
 
-[node name="Evade" type="Node" parent="StateMachine"]
+[node name="Evade" type="Node" parent="StateMachine" unique_id=460636323]
 script = ExtResource("7_evade")
 state_name = "evade"
 
-[node name="ReceiveAttack" type="Node" parent="StateMachine"]
+[node name="ReceiveAttack" type="Node" parent="StateMachine" unique_id=1013767496]
 script = ExtResource("8_receive_attack")
+fallback_duration = 3.0
 state_name = "receive_attack"
 
-[node name="Death" type="Node" parent="StateMachine"]
+[node name="Death" type="Node" parent="StateMachine" unique_id=262768594]
 script = ExtResource("9_death")
 state_name = "death"

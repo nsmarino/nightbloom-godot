@@ -62,7 +62,7 @@ func get_distance_to_player() -> float:
 	return 999.0
 
 
-# Helper: move toward target position using navigation
+# Helper: move toward target position using navigation (with avoidance)
 func navigate_to(target: Vector3, speed: float, delta: float) -> void:
 	# Project target to ground level (navmesh is typically at Y=0)
 	var ground_target: Vector3 = Vector3(target.x, character.global_position.y, target.z)
@@ -71,8 +71,7 @@ func navigate_to(target: Vector3, speed: float, delta: float) -> void:
 	# Check if we're already close enough
 	var direct_distance: float = current_pos.distance_to(ground_target)
 	if direct_distance < 0.5:
-		character.velocity = Vector3.ZERO
-		character.move_and_slide()
+		stop_with_avoidance()
 		return
 	
 	var direction: Vector3
@@ -94,12 +93,6 @@ func navigate_to(target: Vector3, speed: float, delta: float) -> void:
 				use_direct_movement = true
 			else:
 				direction = direction.normalized()
-				
-				# Debug output every ~0.5 seconds
-				if Engine.get_physics_frames() % 30 == 0:
-					print("[AIState:%s] NAV: pos=%s -> waypoint=%s, target=%s" % [
-						state_name, current_pos, next_pos, ground_target
-					])
 		else:
 			use_direct_movement = true
 			if Engine.get_physics_frames() % 30 == 0:
@@ -116,8 +109,7 @@ func navigate_to(target: Vector3, speed: float, delta: float) -> void:
 		if direction.length() > 0.1:
 			direction = direction.normalized()
 		else:
-			character.velocity = Vector3.ZERO
-			character.move_and_slide()
+			stop_with_avoidance()
 			return
 		
 		if Engine.get_physics_frames() % 30 == 0:
@@ -125,24 +117,33 @@ func navigate_to(target: Vector3, speed: float, delta: float) -> void:
 				state_name, current_pos, ground_target, direct_distance
 			])
 	
-	# Apply velocity
-	character.velocity = direction * speed
+	# Calculate desired velocity
+	var desired_velocity: Vector3 = direction * speed
 	
 	# Rotate to face movement direction
 	var target_rotation: float = atan2(direction.x, direction.z)
 	character.rotation.y = lerp_angle(character.rotation.y, target_rotation, delta * 10.0)
 	
-	# Move
-	character.move_and_slide()
+	# Move with avoidance
+	move_with_avoidance(desired_velocity)
 
 
-# Helper: move away from target position
+# Helper: move away from target position (with avoidance)
 func move_away_from(target: Vector3, speed: float, delta: float) -> void:
 	var direction: Vector3 = (character.global_position - target).normalized()
 	direction.y = 0
 	
-	var evade_target: Vector3 = character.global_position + direction * 5.0
-	navigate_to(evade_target, speed, delta)
+	if direction.length() < 0.1:
+		stop_with_avoidance()
+		return
+	
+	# Rotate to face away from target
+	var target_rotation: float = atan2(direction.x, direction.z)
+	character.rotation.y = lerp_angle(character.rotation.y, target_rotation, delta * 10.0)
+	
+	# Move away with avoidance
+	var desired_velocity: Vector3 = direction * speed
+	move_with_avoidance(desired_velocity)
 
 
 # Helper: face the player
@@ -153,3 +154,24 @@ func face_player(delta: float) -> void:
 		if direction.length() > 0.1:
 			var target_rotation: float = atan2(direction.x, direction.z)
 			character.rotation.y = lerp_angle(character.rotation.y, target_rotation, delta * 10.0)
+
+
+# Helper: move with avoidance (uses NavigationAgent3D's RVO avoidance)
+# This sets the desired velocity and lets the avoidance system compute a safe velocity
+# The actual movement happens in BaseEnemy._on_velocity_computed()
+func move_with_avoidance(desired_velocity: Vector3) -> void:
+	if nav_agent and nav_agent.avoidance_enabled:
+		nav_agent.set_velocity(desired_velocity)
+	else:
+		# Fallback if no avoidance
+		character.velocity = desired_velocity
+		character.move_and_slide()
+
+
+# Helper: stop with avoidance (still participates in avoidance calculations)
+func stop_with_avoidance() -> void:
+	if nav_agent and nav_agent.avoidance_enabled:
+		nav_agent.set_velocity(Vector3.ZERO)
+	else:
+		character.velocity = Vector3.ZERO
+		character.move_and_slide()

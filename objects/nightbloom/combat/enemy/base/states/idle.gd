@@ -13,9 +13,8 @@ func on_enter() -> void:
 
 
 func update(_delta: float) -> void:
-	# Stay still during idle
-	character.velocity = Vector3.ZERO
-	character.move_and_slide()
+	# Stay still during idle (but still participate in avoidance)
+	stop_with_avoidance()
 
 
 func check_transition(_delta: float) -> Array:

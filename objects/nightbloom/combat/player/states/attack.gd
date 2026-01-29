@@ -1,18 +1,27 @@
 extends PlayerState
 
-@export var attack_duration: float = 0.8
+## Hitbox timing (as fraction of animation or absolute time if no animation)
 @export var hitbox_start: float = 0.2
 @export var hitbox_end: float = 0.5
 @export var attack_damage: int = 20
+## Fallback duration if animation is missing (set to 0 to require animation)
+@export var fallback_duration: float = 0.8
 
 var has_hit_enemy: bool = false
+var animation_finished: bool = false
+var attack_animation: String = "Combo1"
 
 
 func on_enter() -> void:
 	super.on_enter()
 	has_hit_enemy = false
+	animation_finished = false
+	
 	if animator:
-		animator.play("Combo1")
+		# Connect to animation_finished signal
+		if not animator.animation_finished.is_connected(_on_animation_finished):
+			animator.animation_finished.connect(_on_animation_finished)
+		animator.play(attack_animation)
 	
 	# Enable hit detection
 	if hit_area:
@@ -23,6 +32,10 @@ func on_exit() -> void:
 	super.on_exit()
 	if hit_area:
 		hit_area.monitoring = false
+	
+	# Disconnect signal to avoid issues when re-entering
+	if animator and animator.animation_finished.is_connected(_on_animation_finished):
+		animator.animation_finished.disconnect(_on_animation_finished)
 
 
 func update(_delta: float) -> void:
@@ -33,6 +46,11 @@ func update(_delta: float) -> void:
 	# Check for hits during active frames
 	if duration_between(hitbox_start, hitbox_end) and not has_hit_enemy:
 		_check_for_hits()
+
+
+func _on_animation_finished(anim_name: StringName) -> void:
+	if anim_name == attack_animation:
+		animation_finished = true
 
 
 func _check_for_hits() -> void:
@@ -67,7 +85,13 @@ func _on_hit_enemy(enemy: Node) -> void:
 
 
 func check_transition(_delta: float) -> Array:
-	if duration_longer_than(attack_duration):
+	# Primary: animation finished
+	if animation_finished:
+		return [true, "locomotion"]
+	
+	# Fallback: timer (in case animation is missing or looping)
+	if fallback_duration > 0 and duration_longer_than(fallback_duration):
+		print("[Attack] WARNING: Using fallback duration, animation may not have finished signal")
 		return [true, "locomotion"]
 	
 	return [false, ""]

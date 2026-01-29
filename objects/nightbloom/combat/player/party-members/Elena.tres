@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="PartyMemberData" load_steps=6 format=3 uid="uid://b8vvj8qtt0l5d"]
+[gd_resource type="Resource" script_class="PartyMemberData" format=3 uid="uid://b8vvj8qtt0l5d"]
 
 [ext_resource type="Script" uid="uid://cmaxr3mmur56t" path="res://objects/nightbloom/combat/player/AttackData.gd" id="1_fnplg"]
 [ext_resource type="PackedScene" uid="uid://b8dmw5js5lj1x" path="res://models/character/player/combat-player-pawn.glb" id="2_l5koh"]

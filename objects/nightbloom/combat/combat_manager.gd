@@ -22,6 +22,8 @@ var enemy_resources: Node
 
 func _ready() -> void:
 	print("[CombatManager] Initialized")
+	add_to_group("combat_manager")
+	
 	# Connect to resource signals for victory/defeat detection
 	Events.player_hp_changed.connect(_on_player_hp_changed)
 	Events.enemy_hp_changed.connect(_on_enemy_hp_changed)
@@ -51,9 +53,8 @@ func _physics_process(delta: float) -> void:
 func _process_intro(delta: float) -> void:
 	turn_timer += delta
 	if turn_timer >= intro_duration:
-		# START WITH ENEMY TURN FOR DEBUGGING
-		print("[CombatManager] Intro complete - starting ENEMY TURN first for debugging")
-		_switch_to_enemy_turn()
+
+		_switch_to_player_turn()
 
 
 func _process_turn(delta: float) -> void:
@@ -128,3 +129,7 @@ func is_enemy_turn() -> bool:
 
 func get_current_state() -> CombatState:
 	return current_state
+
+
+func get_turn_time_remaining() -> float:
+	return turn_timer

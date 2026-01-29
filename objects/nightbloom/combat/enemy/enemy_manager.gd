@@ -6,11 +6,18 @@ class_name EnemyManager
 @export var EnemyScene: PackedScene
 @export var EnemyDataResource: EnemyData
 @export var enemy_count: int = 3
+@export var delay_between_attacks: float = 0.5  # Delay after one enemy finishes before next starts
 
 @onready var group_resources: Node = $GroupResources
 
 var active_enemies: Array[BaseEnemy] = []
-var attacking_enemy: BaseEnemy = null
+var attack_queue: Array[BaseEnemy] = []  # Randomized order for this turn
+var current_attacker: BaseEnemy = null
+var is_enemy_turn: bool = false
+var waiting_for_attack_complete: bool = false
+
+# Reference to combat manager for time checking
+var combat_manager: Node = null
 
 
 func _ready() -> void:
@@ -21,8 +28,14 @@ func _ready() -> void:
 	Events.turn_ended.connect(_on_turn_ended)
 	Events.combat_started.connect(_on_combat_started)
 	
-	# Spawn enemies after a short delay
+	# Find combat manager for time checking
 	await get_tree().process_frame
+	combat_manager = get_tree().get_first_node_in_group("combat_manager")
+	if not combat_manager:
+		# Try to find by type
+		combat_manager = get_node_or_null("/root/Arena/CombatManager")
+	
+	# Spawn enemies after a short delay
 	_spawn_enemies()
 
 
@@ -67,6 +80,9 @@ func _spawn_enemies() -> void:
 			enemy.set_player(Pawn)
 			enemy.set_enemy_manager(self)
 			
+			# Connect to attack_cycle_complete signal
+			enemy.attack_cycle_complete.connect(_on_enemy_attack_cycle_complete.bind(enemy))
+			
 			# Add to scene
 			add_child(enemy)
 			# Spawn at ground level (navmesh is at Y=0)
@@ -86,6 +102,8 @@ func _on_combat_started() -> void:
 
 func _on_turn_started(is_player_turn: bool) -> void:
 	print("[EnemyManager] Turn started - is_player_turn: %s" % is_player_turn)
+	is_enemy_turn = not is_player_turn
+	
 	if is_player_turn:
 		_start_player_turn()
 	else:
@@ -100,40 +118,130 @@ func _on_turn_ended(is_player_turn: bool) -> void:
 
 func _start_player_turn() -> void:
 	print("[EnemyManager] Player turn - enemies enter LOCOMOTION_SLOW")
+	is_enemy_turn = false
+	attack_queue.clear()
+	current_attacker = null
+	waiting_for_attack_complete = false
+	
 	for enemy in active_enemies:
 		enemy.command_state("locomotion_slow")
 
 
 func _start_enemy_turn() -> void:
 	print("[EnemyManager] === ENEMY TURN START ===")
+	is_enemy_turn = true
+	waiting_for_attack_complete = false
 	
 	if active_enemies.is_empty():
 		print("[EnemyManager] No active enemies!")
 		return
 	
-	# Pick one enemy to attack, others idle
-	attacking_enemy = active_enemies.pick_random()
-	print("[EnemyManager] Selected attacker: %s" % attacking_enemy.name)
+	# Create randomized attack queue
+	attack_queue = active_enemies.duplicate()
+	attack_queue.shuffle()
 	
+	print("[EnemyManager] Attack queue: %s" % [attack_queue.map(func(e): return e.name)])
+	
+	# All enemies start in idle while waiting
 	for enemy in active_enemies:
-		if enemy == attacking_enemy:
-			print("[EnemyManager] %s -> PURSUE" % enemy.name)
-			enemy.command_state("pursue")
-		else:
-			print("[EnemyManager] %s -> IDLE" % enemy.name)
-			enemy.command_state("idle")
+		enemy.command_state("idle")
+	
+	# Start the first attack
+	_start_next_attack()
 
 
 func _end_enemy_turn() -> void:
 	print("[EnemyManager] === ENEMY TURN END ===")
-	attacking_enemy = null
+	is_enemy_turn = false
+	attack_queue.clear()
+	current_attacker = null
+	waiting_for_attack_complete = false
+
+
+func _start_next_attack() -> void:
+	if not is_enemy_turn:
+		print("[EnemyManager] Not enemy turn, skipping attack")
+		return
+	
+	if attack_queue.is_empty():
+		print("[EnemyManager] Attack queue empty - all enemies have attacked")
+		return
+	
+	# Check if we have enough time for the next attack
+	var time_remaining: float = _get_turn_time_remaining()
+	var next_enemy: BaseEnemy = attack_queue[0]
+	var attack_duration: float = _get_enemy_attack_duration(next_enemy)
+	
+	print("[EnemyManager] Time check: %.1fs remaining, attack needs %.1fs" % [time_remaining, attack_duration])
+	
+	if time_remaining < attack_duration:
+		print("[EnemyManager] Not enough time for attack - remaining enemies stay idle")
+		attack_queue.clear()
+		return
+	
+	# Pop the next enemy from queue and start their attack
+	current_attacker = attack_queue.pop_front()
+	waiting_for_attack_complete = true
+	
+	print("[EnemyManager] Starting attack: %s" % current_attacker.name)
+	current_attacker.command_state("pursue")
+
+
+func _on_enemy_attack_cycle_complete(enemy: BaseEnemy) -> void:
+	print("[EnemyManager] Enemy %s completed attack cycle" % enemy.name)
+	
+	if enemy != current_attacker:
+		print("[EnemyManager] WARNING: Received complete from non-current attacker")
+		return
+	
+	if not is_enemy_turn:
+		print("[EnemyManager] Turn ended, ignoring")
+		return
+	
+	waiting_for_attack_complete = false
+	current_attacker = null
+	
+	# Delay before starting next attack
+	if not attack_queue.is_empty():
+		print("[EnemyManager] Waiting %.1fs before next attack" % delay_between_attacks)
+		await get_tree().create_timer(delay_between_attacks).timeout
+		
+		# Check if still enemy turn after delay
+		if is_enemy_turn:
+			_start_next_attack()
+
+
+func _get_turn_time_remaining() -> float:
+	if combat_manager and combat_manager.has_method("get_turn_time_remaining"):
+		return combat_manager.get_turn_time_remaining()
+	elif combat_manager and "turn_timer" in combat_manager:
+		return combat_manager.turn_timer
+	return 999.0  # Default to allowing attacks if we can't check
+
+
+func _get_enemy_attack_duration(enemy: BaseEnemy) -> float:
+	# Get the attack state from the enemy's state machine
+	if enemy.state_machine:
+		var attack_state: Node = enemy.state_machine.get_node_or_null("Attack")
+		if attack_state and "fallback_duration" in attack_state:
+			return attack_state.fallback_duration
+	return 1.0  # Default estimate
 
 
 func on_enemy_died(enemy: BaseEnemy) -> void:
 	active_enemies.erase(enemy)
+	attack_queue.erase(enemy)
 	
-	if attacking_enemy == enemy:
-		attacking_enemy = null
+	if current_attacker == enemy:
+		current_attacker = null
+		waiting_for_attack_complete = false
+		# Start next attack if there are more
+		if is_enemy_turn and not attack_queue.is_empty():
+			_start_next_attack()
+	
+	# Disconnect signal
+	if enemy.attack_cycle_complete.is_connected(_on_enemy_attack_cycle_complete):
+		enemy.attack_cycle_complete.disconnect(_on_enemy_attack_cycle_complete.bind(enemy))
 	
 	print("[EnemyManager] Enemy died. %d remaining" % active_enemies.size())
 
