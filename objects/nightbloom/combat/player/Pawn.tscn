@@ -7,7 +7,9 @@
 [ext_resource type="Resource" uid="uid://b8vvj8qtt0l5d" path="res://objects/nightbloom/combat/player/party-members/Elena.tres" id="3_md8lp"]
 [ext_resource type="Resource" uid="uid://boypslk8qbfdk" path="res://objects/nightbloom/combat/player/party-members/Asa.tres" id="4_hofpl"]
 [ext_resource type="Script" uid="uid://c4x4cstiqmpwl" path="res://objects/nightbloom/combat/player/states/idle.gd" id="5_idle"]
+[ext_resource type="Resource" uid="uid://cnw2nj2xg7ie" path="res://objects/nightbloom/combat/player/party-members/Granley.tres" id="5_wp4q1"]
 [ext_resource type="Script" uid="uid://c2nip8kvvn423" path="res://objects/nightbloom/combat/player/states/locomotion.gd" id="6_locomotion"]
+[ext_resource type="Resource" uid="uid://dcfx8mkf6ivhr" path="res://objects/nightbloom/combat/player/party-members/June.tres" id="6_ngyu6"]
 [ext_resource type="Script" uid="uid://bi52jte60qofm" path="res://objects/nightbloom/combat/player/states/locomotion_slow.gd" id="7_locomotion_slow"]
 [ext_resource type="Script" uid="uid://dumiyvoyi5k42" path="res://objects/nightbloom/combat/player/states/attack.gd" id="8_attack"]
 [ext_resource type="Script" uid="uid://1xi2gphf7wbm" path="res://objects/nightbloom/combat/player/states/decide_menu.gd" id="9_decide_menu"]
@@ -26,7 +28,7 @@ radius = 1.5
 
 [node name="Pawn" type="CharacterBody3D" unique_id=1151614210 groups=["player"]]
 script = ExtResource("1_bjoli")
-PartyMembers = Array[ExtResource("2_hofpl")]([ExtResource("3_md8lp"), ExtResource("4_hofpl")])
+PartyMembers = Array[ExtResource("2_hofpl")]([ExtResource("3_md8lp"), ExtResource("4_hofpl"), ExtResource("5_wp4q1"), ExtResource("6_ngyu6")])
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=261546465]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

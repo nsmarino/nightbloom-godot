@@ -15,6 +15,12 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_attack"]
 radius = 1.5
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bxjew"]
+bg_color = Color(0.7907412, 0.54697615, 1.92523e-07, 1)
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_bxjew"]
+viewport_path = NodePath("Visuals/StaggerStatus")
+
 [node name="BaseEnemy" type="CharacterBody3D" unique_id=1665627281 groups=["enemy"]]
 script = ExtResource("1_enemy")
 
@@ -74,3 +80,28 @@ state_name = "receive_attack"
 [node name="Death" type="Node" parent="StateMachine" unique_id=262768594]
 script = ExtResource("9_death")
 state_name = "death"
+
+[node name="Visuals" type="Node3D" parent="." unique_id=1872358325]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2888794, 0)
+
+[node name="StaggerStatus" type="SubViewport" parent="Visuals" unique_id=313100524]
+size = Vector2i(200, 42)
+
+[node name="PressureIndicator" type="Label" parent="Visuals/StaggerStatus" unique_id=1831062431]
+custom_minimum_size = Vector2(200, 0)
+offset_top = 24.0
+offset_right = 200.0
+offset_bottom = 47.0
+text = "PRESSURED"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="Visuals/StaggerStatus" unique_id=1290067032]
+offset_right = 200.0
+offset_bottom = 20.0
+theme_override_styles/background = SubResource("StyleBoxFlat_bxjew")
+value = 50.0
+show_percentage = false
+
+[node name="Sprite3D" type="Sprite3D" parent="Visuals" unique_id=332011548]
+billboard = 1
+texture = SubResource("ViewportTexture_bxjew")

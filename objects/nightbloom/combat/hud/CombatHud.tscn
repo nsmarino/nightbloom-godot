@@ -1,6 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://vxdor5xmvcxb"]
+[gd_scene format=3 uid="uid://vxdor5xmvcxb"]
 
-[ext_resource type="Script" path="res://objects/nightbloom/combat/hud/combat_hud.gd" id="1_hud"]
+[ext_resource type="Script" uid="uid://doic1hjk6mdk6" path="res://objects/nightbloom/combat/hud/combat_hud.gd" id="1_hud"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
 bg_color = Color(0.2, 0.05, 0.05, 1)
@@ -38,114 +38,109 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_menu_bg"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
 bg_color = Color(0.1, 0.1, 0.15, 0.9)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-content_margin_left = 16.0
-content_margin_top = 16.0
-content_margin_right = 16.0
-content_margin_bottom = 16.0
 
-[node name="CombatHud" type="CanvasLayer"]
+[node name="CombatHud" type="CanvasLayer" unique_id=1710542593]
 script = ExtResource("1_hud")
 
-[node name="PlayerResourcesLeft" type="VBoxContainer" parent="."]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 18.0
-offset_top = -120.0
-offset_right = 350.0
-offset_bottom = -64.0
-grow_vertical = 0
+[node name="PlayerResourcesLeft" type="VBoxContainer" parent="." unique_id=1798789495]
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 372.0
+offset_bottom = 96.0
 
-[node name="Label" type="Label" parent="PlayerResourcesLeft"]
+[node name="Label" type="Label" parent="PlayerResourcesLeft" unique_id=1472879985]
 layout_mode = 2
 text = "PARTY HP"
 
-[node name="PlayerHealth" type="ProgressBar" parent="PlayerResourcesLeft"]
+[node name="PlayerHealth" type="ProgressBar" parent="PlayerResourcesLeft" unique_id=2126279297]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
-max_value = 100.0
 value = 100.0
 show_percentage = false
 
-[node name="APContainer" type="HBoxContainer" parent="."]
-anchors_preset = 3
-anchor_left = 1.0
+[node name="APContainer" type="HBoxContainer" parent="." unique_id=2020614253]
+anchors_preset = 7
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -180.0
-offset_top = -150.0
-offset_right = -18.0
-offset_bottom = -120.0
-grow_horizontal = 0
+offset_left = -81.0
+offset_top = -143.64001
+offset_right = 81.0
+offset_bottom = -113.640015
+grow_horizontal = 2
 grow_vertical = 0
 alignment = 2
 
-[node name="AP1" type="ProgressBar" parent="APContainer"]
+[node name="AP1" type="ProgressBar" parent="APContainer" unique_id=746087464]
 custom_minimum_size = Vector2(50, 24)
 layout_mode = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_ap_fill")
 max_value = 30.0
-value = 0.0
 show_percentage = false
 
-[node name="AP2" type="ProgressBar" parent="APContainer"]
+[node name="AP2" type="ProgressBar" parent="APContainer" unique_id=2124066434]
 custom_minimum_size = Vector2(50, 24)
 layout_mode = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_ap_fill")
 max_value = 30.0
-value = 0.0
 show_percentage = false
 
-[node name="AP3" type="ProgressBar" parent="APContainer"]
+[node name="AP3" type="ProgressBar" parent="APContainer" unique_id=1124765603]
 custom_minimum_size = Vector2(50, 24)
 layout_mode = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_ap_fill")
 max_value = 30.0
-value = 0.0
 show_percentage = false
 
-[node name="EnemyResources" type="VBoxContainer" parent="."]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -350.0
-offset_top = 18.0
-offset_right = -18.0
-offset_bottom = 80.0
-grow_horizontal = 0
+[node name="EnemyResources" type="VBoxContainer" parent="." unique_id=1603981231]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -166.0
+offset_top = -119.96997
+offset_right = 166.0
+offset_bottom = -57.96997
+grow_horizontal = 2
+grow_vertical = 0
 
-[node name="Label" type="Label" parent="EnemyResources"]
+[node name="Label" type="Label" parent="EnemyResources" unique_id=1570447443]
 layout_mode = 2
 text = "ENEMY HP"
 
-[node name="EnemyHealth" type="ProgressBar" parent="EnemyResources"]
+[node name="EnemyHealth" type="ProgressBar" parent="EnemyResources" unique_id=874883669]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
-max_value = 100.0
 value = 100.0
 show_percentage = false
 
-[node name="TurnBar" type="ProgressBar" parent="."]
-anchors_preset = 12
+[node name="TurnBar" type="ProgressBar" parent="." unique_id=795822462]
+anchors_preset = 7
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = 18.0
-offset_top = -48.0
-offset_right = -18.0
-offset_bottom = -18.0
+offset_left = -200.0
+offset_top = -40.0
+offset_right = 200.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/background = SubResource("StyleBoxFlat_turn_bg")
@@ -154,7 +149,7 @@ max_value = 15.0
 value = 15.0
 show_percentage = false
 
-[node name="DecideMenu" type="PanelContainer" parent="."]
+[node name="DecideMenu" type="PanelContainer" parent="." unique_id=1147066896]
 visible = false
 anchors_preset = 3
 anchor_left = 1.0
@@ -169,49 +164,47 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_menu_bg")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="DecideMenu"]
+[node name="VBoxContainer" type="VBoxContainer" parent="DecideMenu" unique_id=1186271582]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="DecideMenu/VBoxContainer"]
+[node name="Title" type="Label" parent="DecideMenu/VBoxContainer" unique_id=389553707]
 layout_mode = 2
 text = "ACTIONS"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="DecideMenu/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="DecideMenu/VBoxContainer" unique_id=1457083937]
 layout_mode = 2
 
-[node name="SpellButton" type="Button" parent="DecideMenu/VBoxContainer"]
+[node name="SpellButton" type="Button" parent="DecideMenu/VBoxContainer" unique_id=1946482061]
 layout_mode = 2
-focus_mode = 2
 text = "SPELL (30 AP)"
 
-[node name="ItemButton" type="Button" parent="DecideMenu/VBoxContainer"]
+[node name="ItemButton" type="Button" parent="DecideMenu/VBoxContainer" unique_id=800262381]
 layout_mode = 2
-focus_mode = 2
 text = "ITEM (15 AP)"
 
-[node name="SwitchButton" type="Button" parent="DecideMenu/VBoxContainer"]
+[node name="SwitchButton" type="Button" parent="DecideMenu/VBoxContainer" unique_id=689625808]
 layout_mode = 2
-focus_mode = 2
 text = "PARTY SWITCH (15 AP)"
 
-[node name="CancelLabel" type="Label" parent="DecideMenu/VBoxContainer"]
+[node name="CancelLabel" type="Label" parent="DecideMenu/VBoxContainer" unique_id=1529671634]
 layout_mode = 2
 text = "[B] Cancel"
 horizontal_alignment = 1
 
-[node name="TurnIndicatorContainer" type="Control" parent="."]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -150.0
-offset_top = 18.0
-offset_right = 150.0
-offset_bottom = 80.0
-grow_horizontal = 2
+[node name="TurnIndicatorContainer" type="Control" parent="." unique_id=1296534886]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -316.66998
+offset_top = 27.88
+offset_right = -16.670227
+offset_bottom = 89.880005
+grow_horizontal = 0
 
-[node name="PlayerTurnLabel" type="Label" parent="TurnIndicatorContainer"]
+[node name="PlayerTurnLabel" type="Label" parent="TurnIndicatorContainer" unique_id=1674406308]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -230,7 +223,7 @@ text = "PLAYER TURN"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="EnemyTurnLabel" type="Label" parent="TurnIndicatorContainer"]
+[node name="EnemyTurnLabel" type="Label" parent="TurnIndicatorContainer" unique_id=526189036]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 8
@@ -250,7 +243,7 @@ text = "ENEMY TURN"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="VictoryLabel" type="Label" parent="TurnIndicatorContainer"]
+[node name="VictoryLabel" type="Label" parent="TurnIndicatorContainer" unique_id=251158199]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -270,7 +263,7 @@ text = "VICTORY!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DefeatLabel" type="Label" parent="TurnIndicatorContainer"]
+[node name="DefeatLabel" type="Label" parent="TurnIndicatorContainer" unique_id=1368466011]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -289,3 +282,7 @@ theme_override_font_sizes/font_size = 36
 text = "DEFEAT..."
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="PartyMembers" type="HBoxContainer" parent="." unique_id=1097010505]
+offset_right = 40.0
+offset_bottom = 40.0
