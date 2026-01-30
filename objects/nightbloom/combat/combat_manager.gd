@@ -3,17 +3,21 @@ class_name CombatManager
 
 enum CombatState {
 	INTRO,
+	PLAYER_TURN_INTRO,
 	PLAYER_TURN,
+	ENEMY_TURN_INTRO,
 	ENEMY_TURN,
 	VICTORY,
 	DEFEAT,
 }
 
 @export var intro_duration: float = 2.0
+@export var turn_intro_duration: float = 2.0  # Duration of the turn intro phase
 @export var turn_duration: float = 15.0
 
 var current_state: CombatState = CombatState.INTRO
 var turn_timer: float = 0.0
+var intro_timer: float = 0.0  # Separate timer for intro phases
 var is_paused: bool = false
 
 # References set by arena
@@ -39,9 +43,13 @@ func _physics_process(delta: float) -> void:
 	
 	match current_state:
 		CombatState.INTRO:
-			_process_intro(delta)
+			_process_combat_intro(delta)
+		CombatState.PLAYER_TURN_INTRO:
+			_process_turn_intro(delta, true)
 		CombatState.PLAYER_TURN:
 			_process_turn(delta)
+		CombatState.ENEMY_TURN_INTRO:
+			_process_turn_intro(delta, false)
 		CombatState.ENEMY_TURN:
 			_process_turn(delta)
 		CombatState.VICTORY:
@@ -50,11 +58,22 @@ func _physics_process(delta: float) -> void:
 			pass
 
 
-func _process_intro(delta: float) -> void:
-	turn_timer += delta
-	if turn_timer >= intro_duration:
+func _process_combat_intro(delta: float) -> void:
+	intro_timer += delta
+	if intro_timer >= intro_duration:
+		# After combat intro, go to first player turn intro
+		_start_player_turn_intro()
 
-		_switch_to_player_turn()
+
+func _process_turn_intro(delta: float, is_player_turn: bool) -> void:
+	intro_timer += delta
+	if intro_timer >= turn_intro_duration:
+		# Intro phase complete - start the actual turn
+		Events.turn_intro_ended.emit(is_player_turn)
+		if is_player_turn:
+			_start_player_turn()
+		else:
+			_start_enemy_turn()
 
 
 func _process_turn(delta: float) -> void:
@@ -65,16 +84,30 @@ func _process_turn(delta: float) -> void:
 		_end_current_turn()
 
 
-func _switch_to_player_turn() -> void:
-	print("[CombatManager] === SWITCHING TO PLAYER TURN ===")
+func _start_player_turn_intro() -> void:
+	print("[CombatManager] === PLAYER TURN INTRO ===")
+	_enter_state(CombatState.PLAYER_TURN_INTRO)
+	intro_timer = 0.0
+	Events.turn_intro_started.emit(true)
+
+
+func _start_enemy_turn_intro() -> void:
+	print("[CombatManager] === ENEMY TURN INTRO ===")
+	_enter_state(CombatState.ENEMY_TURN_INTRO)
+	intro_timer = 0.0
+	Events.turn_intro_started.emit(false)
+
+
+func _start_player_turn() -> void:
+	print("[CombatManager] === PLAYER TURN START ===")
 	_enter_state(CombatState.PLAYER_TURN)
 	turn_timer = turn_duration
 	Events.turn_started.emit(true)
 	Events.turn_timer_updated.emit(turn_timer, turn_duration)
 
 
-func _switch_to_enemy_turn() -> void:
-	print("[CombatManager] === SWITCHING TO ENEMY TURN ===")
+func _start_enemy_turn() -> void:
+	print("[CombatManager] === ENEMY TURN START ===")
 	_enter_state(CombatState.ENEMY_TURN)
 	turn_timer = turn_duration
 	Events.turn_started.emit(false)
@@ -86,18 +119,18 @@ func _end_current_turn() -> void:
 		CombatState.PLAYER_TURN:
 			print("[CombatManager] Player turn ended")
 			Events.turn_ended.emit(true)
-			_switch_to_enemy_turn()
+			_start_enemy_turn_intro()
 		CombatState.ENEMY_TURN:
 			print("[CombatManager] Enemy turn ended")
 			Events.turn_ended.emit(false)
-			_switch_to_player_turn()
+			_start_player_turn_intro()
 
 
 func _enter_state(new_state: CombatState) -> void:
 	current_state = new_state
 	match new_state:
 		CombatState.INTRO:
-			turn_timer = 0.0
+			intro_timer = 0.0
 			Events.combat_started.emit()
 		CombatState.VICTORY:
 			Events.combat_ended.emit(true)
@@ -127,9 +160,17 @@ func is_enemy_turn() -> bool:
 	return current_state == CombatState.ENEMY_TURN
 
 
+func is_in_turn_intro() -> bool:
+	return current_state in [CombatState.PLAYER_TURN_INTRO, CombatState.ENEMY_TURN_INTRO]
+
+
 func get_current_state() -> CombatState:
 	return current_state
 
 
 func get_turn_time_remaining() -> float:
 	return turn_timer
+
+
+func get_turn_intro_duration() -> float:
+	return turn_intro_duration

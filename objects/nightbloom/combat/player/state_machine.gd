@@ -22,6 +22,7 @@ func _ready() -> void:
 		current_state.mark_enter_state()
 		current_state.on_enter()
 	
+	Events.turn_intro_started.connect(_on_turn_intro_started)
 	Events.turn_started.connect(_on_turn_started)
 	Events.turn_ended.connect(_on_turn_ended)
 	Events.combat_ended.connect(_on_combat_ended)
@@ -85,16 +86,18 @@ func set_enemy_group(group: Node) -> void:
 		state.enemy_group = group
 
 
+func _on_turn_intro_started(_is_player_turn: bool) -> void:
+	# During turn intro, snap to idle immediately regardless of current state
+	print("[PlayerStateMachine] Turn intro started - snapping to idle")
+	switch_to("idle")
+
+
 func _on_turn_started(is_player_turn: bool) -> void:
+	# This is called AFTER the turn intro phase completes
 	if is_player_turn:
-		# Don't interrupt vulnerable or receive_attack states
-		if current_state and current_state.state_name not in ["vulnerable", "receive_attack"]:
-			switch_to("locomotion")
+		switch_to("locomotion")
 	else:
-		if current_state and current_state.state_name == "attack":
-			switch_to("vulnerable")
-		elif current_state and current_state.state_name not in ["guard", "receive_attack"]:
-			switch_to("locomotion_slow")
+		switch_to("locomotion_slow")
 
 
 func _on_turn_ended(_is_player_turn: bool) -> void:

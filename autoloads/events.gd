@@ -13,7 +13,9 @@ signal phase_changed(phase: Phase)
 
 # Combat phase signals
 signal combat_started
-signal turn_started(is_player_turn: bool)
+signal turn_intro_started(is_player_turn: bool)  # Turn intro phase begins (everyone idles)
+signal turn_intro_ended(is_player_turn: bool)    # Turn intro phase ends (turn begins)
+signal turn_started(is_player_turn: bool)        # Actual turn gameplay begins
 signal turn_ended(is_player_turn: bool)
 signal combat_paused(paused: bool)
 signal combat_ended(player_won: bool)

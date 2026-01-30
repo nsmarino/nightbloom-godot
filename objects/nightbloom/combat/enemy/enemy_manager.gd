@@ -24,6 +24,7 @@ func _ready() -> void:
 	print("[EnemyManager] Initialized")
 	
 	# Connect to combat events
+	Events.turn_intro_started.connect(_on_turn_intro_started)
 	Events.turn_started.connect(_on_turn_started)
 	Events.turn_ended.connect(_on_turn_ended)
 	Events.combat_started.connect(_on_combat_started)
@@ -96,6 +97,18 @@ func _spawn_enemies() -> void:
 
 func _on_combat_started() -> void:
 	print("[EnemyManager] Combat started - setting all enemies to IDLE")
+	for enemy in active_enemies:
+		enemy.command_state("idle")
+
+
+func _on_turn_intro_started(_is_player_turn: bool) -> void:
+	# During turn intro, snap all enemies to idle immediately
+	print("[EnemyManager] Turn intro started - snapping all enemies to idle")
+	is_enemy_turn = false
+	attack_queue.clear()
+	current_attacker = null
+	waiting_for_attack_complete = false
+	
 	for enemy in active_enemies:
 		enemy.command_state("idle")
 

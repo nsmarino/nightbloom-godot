@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://vxdor5xmvcxb"]
+[gd_scene load_steps=8 format=3 uid="uid://vxdor5xmvcxb"]
 
 [ext_resource type="Script" path="res://objects/nightbloom/combat/hud/combat_hud.gd" id="1_hud"]
 
@@ -201,14 +201,91 @@ layout_mode = 2
 text = "[B] Cancel"
 horizontal_alignment = 1
 
-[node name="TurnIndicator" type="Label" parent="."]
+[node name="TurnIndicatorContainer" type="Control" parent="."]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -100.0
+offset_left = -150.0
 offset_top = 18.0
-offset_right = 100.0
-offset_bottom = 50.0
+offset_right = 150.0
+offset_bottom = 80.0
 grow_horizontal = 2
+
+[node name="PlayerTurnLabel" type="Label" parent="TurnIndicatorContainer"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -20.0
+offset_right = 100.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 28
 text = "PLAYER TURN"
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EnemyTurnLabel" type="Label" parent="TurnIndicatorContainer"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -20.0
+offset_right = 100.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 28
+text = "ENEMY TURN"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VictoryLabel" type="Label" parent="TurnIndicatorContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -20.0
+offset_right = 100.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 36
+text = "VICTORY!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DefeatLabel" type="Label" parent="TurnIndicatorContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -20.0
+offset_right = 100.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.5, 0.2, 0.2, 1)
+theme_override_font_sizes/font_size = 36
+text = "DEFEAT..."
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -6,7 +6,13 @@ class_name CombatHud
 @onready var turn_bar: ProgressBar = $TurnBar
 @onready var ap_container: HBoxContainer = $APContainer
 @onready var decide_menu: PanelContainer = $DecideMenu
-@onready var turn_indicator: Label = $TurnIndicator
+
+# Turn indicator labels
+@onready var turn_indicator_container: Control = $TurnIndicatorContainer
+@onready var player_turn_label: Label = $TurnIndicatorContainer/PlayerTurnLabel
+@onready var enemy_turn_label: Label = $TurnIndicatorContainer/EnemyTurnLabel
+@onready var victory_label: Label = $TurnIndicatorContainer/VictoryLabel
+@onready var defeat_label: Label = $TurnIndicatorContainer/DefeatLabel
 
 @onready var spell_button: Button = $DecideMenu/VBoxContainer/SpellButton
 @onready var item_button: Button = $DecideMenu/VBoxContainer/ItemButton
@@ -23,6 +29,10 @@ var menu_buttons: Array[Button] = []
 # Reference to player state machine for menu actions
 var player_state_machine: Node
 
+# Animation state
+var transition_tween: Tween = null
+var turn_intro_duration: float = 2.0  # Will be set from combat manager
+
 
 func _ready() -> void:
 	# Connect to Events signals
@@ -32,6 +42,7 @@ func _ready() -> void:
 	Events.turn_timer_updated.connect(_on_turn_timer_updated)
 	Events.combat_paused.connect(_on_combat_paused)
 	Events.combat_ended.connect(_on_combat_ended)
+	Events.turn_intro_started.connect(_on_turn_intro_started)
 	Events.turn_started.connect(_on_turn_started)
 	
 	# Collect AP segment bars
@@ -54,6 +65,16 @@ func _ready() -> void:
 	# Initially hide decide menu
 	if decide_menu:
 		decide_menu.visible = false
+	
+	# Get turn intro duration from combat manager
+	await get_tree().process_frame
+	var combat_manager: Node = get_tree().get_first_node_in_group("combat_manager")
+	if combat_manager and combat_manager.has_method("get_turn_intro_duration"):
+		turn_intro_duration = combat_manager.get_turn_intro_duration()
+	
+	# Initial state - show player turn (combat starts with player turn)
+	_set_label_alpha(player_turn_label, 1.0)
+	_set_label_alpha(enemy_turn_label, 0.0)
 
 
 func _process(_delta: float) -> void:
@@ -94,9 +115,14 @@ func _on_turn_timer_updated(time_remaining: float, turn_duration: float) -> void
 		turn_bar.value = time_remaining
 
 
-func _on_turn_started(is_player_turn: bool) -> void:
-	if turn_indicator:
-		turn_indicator.text = "PLAYER TURN" if is_player_turn else "ENEMY TURN"
+func _on_turn_intro_started(is_player_turn: bool) -> void:
+	# Play the transition animation during turn intro
+	_play_turn_transition(is_player_turn)
+
+
+func _on_turn_started(_is_player_turn: bool) -> void:
+	# Turn has actually started (after intro) - ensure correct label is shown
+	pass
 
 
 func _on_combat_paused(paused: bool) -> void:
@@ -114,8 +140,66 @@ func _on_combat_ended(player_won: bool) -> void:
 		decide_menu.visible = false
 	menu_open = false
 	
-	if turn_indicator:
-		turn_indicator.text = "VICTORY!" if player_won else "DEFEAT..."
+	# Kill any running transition
+	if transition_tween:
+		transition_tween.kill()
+	
+	# Hide turn labels, show victory/defeat
+	_set_label_alpha(player_turn_label, 0.0)
+	_set_label_alpha(enemy_turn_label, 0.0)
+	
+	if player_won:
+		victory_label.visible = true
+		defeat_label.visible = false
+	else:
+		victory_label.visible = false
+		defeat_label.visible = true
+
+
+func _play_turn_transition(to_player_turn: bool) -> void:
+	# Kill any existing tween
+	if transition_tween:
+		transition_tween.kill()
+	
+	# Ensure victory/defeat labels are hidden
+	victory_label.visible = false
+	defeat_label.visible = false
+	
+	# Create new tween for transition animation
+	transition_tween = create_tween()
+	transition_tween.set_parallel(true)
+	
+	var from_label: Label = enemy_turn_label if to_player_turn else player_turn_label
+	var to_label: Label = player_turn_label if to_player_turn else enemy_turn_label
+	
+	# Animation timing - use full intro duration
+	var half_duration: float = turn_intro_duration * 0.4
+	var hold_duration: float = turn_intro_duration * 0.2
+	
+	# Phase 1: Scale up and fade out the old label
+	transition_tween.tween_property(from_label, "modulate:a", 0.0, half_duration).set_ease(Tween.EASE_IN)
+	transition_tween.tween_property(from_label, "scale", Vector2(1.5, 1.5), half_duration).set_ease(Tween.EASE_IN)
+	transition_tween.tween_property(from_label, "position", from_label.position - Vector2(25, 10), half_duration)
+	
+	# Phase 2: After a moment, scale in and fade in the new label
+	to_label.scale = Vector2(0.5, 0.5)
+	to_label.position = to_label.position + Vector2(25, 10)
+	_set_label_alpha(to_label, 0.0)
+	
+	transition_tween.tween_property(to_label, "modulate:a", 1.0, half_duration).set_delay(half_duration + hold_duration * 0.5).set_ease(Tween.EASE_OUT)
+	transition_tween.tween_property(to_label, "scale", Vector2(1.0, 1.0), half_duration).set_delay(half_duration + hold_duration * 0.5).set_ease(Tween.EASE_OUT)
+	transition_tween.tween_property(to_label, "position", Vector2(-100, -20), half_duration).set_delay(half_duration + hold_duration * 0.5)
+	
+	# Reset old label position for next transition
+	transition_tween.tween_callback(func(): 
+		from_label.scale = Vector2(1.0, 1.0)
+		from_label.position = Vector2(-100, -20)
+	).set_delay(turn_intro_duration)
+
+
+func _set_label_alpha(label: Label, alpha: float) -> void:
+	if label:
+		label.modulate.a = alpha
 
 
 func _handle_menu_input() -> void:
