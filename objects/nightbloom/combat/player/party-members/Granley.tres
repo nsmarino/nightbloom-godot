@@ -5,7 +5,6 @@
 [ext_resource type="Texture2D" uid="uid://dkfel4u52blri" path="res://sprites/player/Face.png" id="2_tvese"]
 [ext_resource type="Script" uid="uid://bw2s1pyxu4qyc" path="res://objects/nightbloom/combat/player/PartyMemberData.gd" id="3_tvese"]
 [ext_resource type="Script" uid="uid://cttr2bvqc6o83" path="res://objects/nightbloom/combat/player/SpellData.gd" id="4_mvl6c"]
-[ext_resource type="Resource" uid="uid://svwuuhwaq153" path="res://resources/spells/earth-spell.tres" id="5_8x4mt"]
 
 [sub_resource type="Resource" id="Resource_byyns"]
 script = ExtResource("1_2ymt0")
@@ -16,13 +15,19 @@ contact_particle_fx = "contact_1"
 attack_power = "20"
 metadata/_custom_type_script = "uid://cmaxr3mmur56t"
 
+[sub_resource type="Resource" id="Resource_2ymt0"]
+script = ExtResource("4_mvl6c")
+name = "Water Spell"
+attack_power = 10
+metadata/_custom_type_script = "uid://cttr2bvqc6o83"
+
 [resource]
 script = ExtResource("3_tvese")
-display_name = &"Elena"
+display_name = &"Granley"
 character_scene = ExtResource("2_ba4mb")
 character_portrait = ExtResource("2_tvese")
 anim_locomotion = "RUN"
 anim_receive_hit = "HitReact"
 attacks = Array[ExtResource("1_2ymt0")]([SubResource("Resource_byyns")])
-spells = Array[ExtResource("4_mvl6c")]([ExtResource("5_8x4mt")])
+spells = Array[ExtResource("4_mvl6c")]([SubResource("Resource_2ymt0")])
 metadata/_custom_type_script = "uid://bw2s1pyxu4qyc"

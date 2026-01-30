@@ -15,6 +15,12 @@ contact_particle_fx = "contact_1"
 attack_power = "30"
 metadata/_custom_type_script = "uid://cmaxr3mmur56t"
 
+[sub_resource type="Resource" id="Resource_4adyi"]
+script = ExtResource("4_cpu2g")
+name = "Fire Spell"
+animation = "Spell"
+metadata/_custom_type_script = "uid://cttr2bvqc6o83"
+
 [resource]
 script = ExtResource("3_f0lgt")
 display_name = &"Asa"
@@ -23,4 +29,5 @@ character_portrait = ExtResource("2_f0lgt")
 anim_locomotion = "RUN"
 anim_receive_hit = "HitReact"
 attacks = Array[ExtResource("1_nmhyi")]([SubResource("Resource_byyns")])
+spells = Array[ExtResource("4_cpu2g")]([SubResource("Resource_4adyi")])
 metadata/_custom_type_script = "uid://bw2s1pyxu4qyc"

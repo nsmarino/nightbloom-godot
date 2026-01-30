@@ -5,6 +5,7 @@ extends AIState
 @export var hitbox_end: float = 0.5
 ## Fallback duration if animation is missing (also used for time-check before attacking)
 @export var fallback_duration: float = 0.8
+@export var stagger_power: int = 20
 
 var has_hit_player: bool = false
 var animation_finished: bool = false
@@ -88,10 +89,14 @@ func _on_hit_player(target: Node) -> void:
 	has_hit_player = true
 	
 	var damage: int = enemy_data.attack_power if enemy_data else 10
-	print("[Attack] HIT PLAYER! Dealing %d damage" % damage)
+	print("[Attack] HIT PLAYER! Dealing %d damage, %d stagger" % [damage, stagger_power])
 	
 	# Signal the hit
 	Events.attack_hit.emit(character, target, damage)
+	
+	# Apply stagger damage to player's active party member
+	if target.has_method("apply_stagger_damage_to_active"):
+		target.apply_stagger_damage_to_active(float(stagger_power))
 	
 	# Tell player to receive damage
 	if target.has_method("receive_attack"):

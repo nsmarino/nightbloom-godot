@@ -38,5 +38,18 @@ signal attack_hit(attacker: Node, target: Node, damage: int)
 signal player_state_changed(new_state: String)
 signal enemy_state_changed(enemy: Node, new_state: String)
 
+# Stagger signals
+signal stagger_should_drain(delta: float)
+signal player_stagger_changed(member_index: int, current: float, max_val: float)
+signal enemy_stagger_changed(enemy: Node, current: float, max_val: float)
+signal individual_staggered(target: Node, is_player: bool)
+signal group_all_staggered(is_player_group: bool)
+
+# Off balance signal
+signal player_off_balance_changed(is_off_balance: bool)
+
+# Party member signals
+signal active_party_member_changed(member_index: int)
+
 func _ready() -> void:
 	print("Init autoload events")

@@ -80,6 +80,9 @@ func _process_turn(delta: float) -> void:
 	turn_timer -= delta
 	Events.turn_timer_updated.emit(turn_timer, turn_duration)
 	
+	# Emit stagger drain signal (only during active turns, not during intros or pause)
+	Events.stagger_should_drain.emit(delta)
+	
 	if turn_timer <= 0:
 		_end_current_turn()
 

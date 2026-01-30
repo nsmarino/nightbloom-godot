@@ -8,6 +8,9 @@ class_name EnemyData
 @export var attack_range: float = 2.0
 @export var pursue_range: float = 15.0
 
+# Spell weakness type (enemy enters PRESSURED when hit by matching spell type)
+@export var spell_weakness_type: SpellData.SpellType = SpellData.SpellType.EARTH
+
 # Animation names
 @export var anim_idle: String = "Idle"
 @export var anim_locomotion: String = "RUN"

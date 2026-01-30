@@ -30,7 +30,7 @@ script = ExtResource("6_arena")
 [node name="CombatManager" type="Node" parent="." unique_id=914338496]
 script = ExtResource("1_vb544")
 intro_duration = 1.0
-turn_duration = 10.0
+turn_duration = 30.0
 
 [node name="Pawn" parent="." unique_id=1861920858 instance=ExtResource("2_vb544")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)

@@ -5,7 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://b8dmw5js5lj1x" path="res://models/character/player/combat-player-pawn.glb" id="2_k7nyn"]
 [ext_resource type="Script" uid="uid://bw2s1pyxu4qyc" path="res://objects/nightbloom/combat/player/PartyMemberData.gd" id="3_57gtf"]
 [ext_resource type="Script" uid="uid://cttr2bvqc6o83" path="res://objects/nightbloom/combat/player/SpellData.gd" id="4_u53q5"]
-[ext_resource type="Resource" uid="uid://svwuuhwaq153" path="res://resources/spells/earth-spell.tres" id="5_orvi7"]
 
 [sub_resource type="Resource" id="Resource_byyns"]
 script = ExtResource("1_g22ml")
@@ -16,13 +15,19 @@ contact_particle_fx = "contact_1"
 attack_power = "20"
 metadata/_custom_type_script = "uid://cmaxr3mmur56t"
 
+[sub_resource type="Resource" id="Resource_g22ml"]
+script = ExtResource("4_u53q5")
+name = "Air Spell"
+attack_power = 10
+metadata/_custom_type_script = "uid://cttr2bvqc6o83"
+
 [resource]
 script = ExtResource("3_57gtf")
-display_name = &"Elena"
+display_name = &"June"
 character_scene = ExtResource("2_k7nyn")
 character_portrait = ExtResource("2_57gtf")
 anim_locomotion = "RUN"
 anim_receive_hit = "HitReact"
 attacks = Array[ExtResource("1_g22ml")]([SubResource("Resource_byyns")])
-spells = Array[ExtResource("4_u53q5")]([ExtResource("5_orvi7")])
+spells = Array[ExtResource("4_u53q5")]([SubResource("Resource_g22ml")])
 metadata/_custom_type_script = "uid://bw2s1pyxu4qyc"

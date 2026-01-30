@@ -4,18 +4,21 @@ extends PlayerState
 @export var hitbox_start: float = 0.2
 @export var hitbox_end: float = 0.5
 @export var attack_damage: int = 20
+@export var stagger_power: int = 20
 ## Fallback duration if animation is missing (set to 0 to require animation)
 @export var fallback_duration: float = 0.8
 
 var has_hit_enemy: bool = false
 var animation_finished: bool = false
 var attack_animation: String = "Combo1"
+var enemies_hit_for_stagger: Array = []  # Track which enemies received stagger this attack
 
 
 func on_enter() -> void:
 	super.on_enter()
 	has_hit_enemy = false
 	animation_finished = false
+	enemies_hit_for_stagger.clear()
 	
 	if animator:
 		# Connect to animation_finished signal
@@ -60,8 +63,25 @@ func _check_for_hits() -> void:
 	var bodies := hit_area.get_overlapping_bodies()
 	for body in bodies:
 		if body.is_in_group("enemy"):
-			_on_hit_enemy(body)
-			break
+			# Apply stagger damage to all enemies in hitbox
+			_apply_stagger_to_enemy(body)
+			
+			# HP damage only happens once per attack
+			if not has_hit_enemy:
+				_on_hit_enemy(body)
+
+
+func _apply_stagger_to_enemy(enemy: Node) -> void:
+	# Only apply stagger once per enemy per attack
+	if enemy in enemies_hit_for_stagger:
+		return
+	
+	enemies_hit_for_stagger.append(enemy)
+	
+	# Apply stagger damage
+	if enemy.has_method("apply_stagger_damage"):
+		enemy.apply_stagger_damage(float(stagger_power))
+		print("[Attack] Applied %d stagger damage to %s" % [stagger_power, enemy.name])
 
 
 func _on_hit_enemy(enemy: Node) -> void:

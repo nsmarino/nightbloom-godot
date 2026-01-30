@@ -95,13 +95,21 @@ func _on_turn_intro_started(_is_player_turn: bool) -> void:
 func _on_turn_started(is_player_turn: bool) -> void:
 	# This is called AFTER the turn intro phase completes
 	if is_player_turn:
+		# Clear off-balance at start of player turn
+		if pawn.is_active_off_balance():
+			pawn.set_active_off_balance(false)
+			print("[PlayerStateMachine] Off-balance cleared at start of player turn")
 		switch_to("locomotion")
 	else:
 		switch_to("locomotion_slow")
 
 
-func _on_turn_ended(_is_player_turn: bool) -> void:
-	pass
+func _on_turn_ended(is_player_turn: bool) -> void:
+	# Check if player was still attacking when player turn ended
+	if is_player_turn:
+		if current_state and current_state.state_name == "attack":
+			pawn.set_active_off_balance(true)
+			print("[PlayerStateMachine] Player was attacking at turn end - now OFF BALANCE!")
 
 
 func _on_combat_ended(player_won: bool) -> void:

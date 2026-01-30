@@ -32,6 +32,9 @@ func _setup_connections() -> void:
 	# Give HUD reference to player state machine
 	if combat_hud and pawn:
 		combat_hud.set_player_state_machine(pawn.state_machine)
+		# Initialize party portraits
+		if combat_hud.has_method("initialize_party_portraits"):
+			combat_hud.initialize_party_portraits(pawn)
 	
 	# Make sure enemy group has the pawn reference
 	if enemy_group and pawn:

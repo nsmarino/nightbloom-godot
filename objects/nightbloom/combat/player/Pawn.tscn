@@ -14,6 +14,7 @@
 [ext_resource type="Script" uid="uid://dumiyvoyi5k42" path="res://objects/nightbloom/combat/player/states/attack.gd" id="8_attack"]
 [ext_resource type="Script" uid="uid://1xi2gphf7wbm" path="res://objects/nightbloom/combat/player/states/decide_menu.gd" id="9_decide_menu"]
 [ext_resource type="Script" uid="uid://dkmgdw1rcsb1c" path="res://objects/nightbloom/combat/player/states/spell.gd" id="10_spell"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/player/states/select_spell_target.gd" id="10b_select_spell_target"]
 [ext_resource type="Script" uid="uid://dhj7wut7k7ls" path="res://objects/nightbloom/combat/player/states/item.gd" id="11_item"]
 [ext_resource type="Script" uid="uid://ho2prrrnaj6r" path="res://objects/nightbloom/combat/player/states/guard.gd" id="12_guard"]
 [ext_resource type="Script" uid="uid://1cyo2r3eggeo" path="res://objects/nightbloom/combat/player/states/receive_attack.gd" id="13_receive_attack"]
@@ -75,6 +76,10 @@ state_name = "decide_menu"
 [node name="Spell" type="Node" parent="StateMachine" unique_id=289793158]
 script = ExtResource("10_spell")
 state_name = "spell"
+
+[node name="SelectSpellTarget" type="Node" parent="StateMachine"]
+script = ExtResource("10b_select_spell_target")
+state_name = "select_spell_target"
 
 [node name="Item" type="Node" parent="StateMachine" unique_id=1680638874]
 script = ExtResource("11_item")

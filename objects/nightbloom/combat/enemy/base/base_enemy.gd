@@ -7,11 +7,19 @@ class_name BaseEnemy
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var attack_area: Area3D = $AttackArea
 
+# Stagger UI references
+@onready var stagger_bar: ProgressBar = $Visuals/StaggerStatus/ProgressBar
+@onready var pressured_label: Label = $Visuals/StaggerStatus/PressureIndicator
+@onready var staggered_label: Label = $Visuals/StaggerStatus/StaggeredIndicator
+
 var player: CharacterBody3D
 var enemy_manager: Node
 var spawn_point: Vector3
 var character_instance: Node3D
 var animator: AnimationPlayer
+
+# Stagger component
+var stagger_component: StaggerComponent
 
 # Orbit data (shared between locomotion_slow and evade states)
 var orbit_center: Vector3 = Vector3.ZERO
@@ -26,6 +34,9 @@ signal attack_cycle_complete
 func _ready() -> void:
 	spawn_point = global_position
 	add_to_group("enemy")
+	
+	# Create and set up stagger component
+	_setup_stagger_component()
 	
 	print("[BaseEnemy:%s] Initialized at %s" % [name, global_position])
 	print("[BaseEnemy:%s] NavAgent: %s" % [name, nav_agent != null])
@@ -238,3 +249,80 @@ func advance_orbit(delta: float, speed: float) -> void:
 func notify_attack_cycle_complete() -> void:
 	print("[BaseEnemy:%s] Attack cycle complete" % name)
 	attack_cycle_complete.emit()
+
+
+# Stagger system
+func _setup_stagger_component() -> void:
+	stagger_component = StaggerComponent.new()
+	add_child(stagger_component)
+	
+	# Connect stagger signals to UI updates
+	stagger_component.stagger_changed.connect(_on_stagger_changed)
+	stagger_component.staggered_state_changed.connect(_on_staggered_state_changed)
+	stagger_component.pressured_state_changed.connect(_on_pressured_state_changed)
+	
+	# Initialize UI state
+	if stagger_bar:
+		stagger_bar.max_value = stagger_component.max_stagger
+		stagger_bar.value = 0.0
+	if pressured_label:
+		pressured_label.visible = false
+	if staggered_label:
+		staggered_label.visible = false
+
+
+func _on_stagger_changed(current: float, max_val: float) -> void:
+	if stagger_bar:
+		stagger_bar.max_value = max_val
+		stagger_bar.value = current
+	
+	# Emit global event for HUD/other systems
+	Events.enemy_stagger_changed.emit(self, current, max_val)
+
+
+func _on_staggered_state_changed(is_staggered: bool) -> void:
+	if staggered_label:
+		staggered_label.visible = is_staggered
+	
+	# If staggered, switch to staggered state
+	if is_staggered:
+		Events.individual_staggered.emit(self, false)
+		command_state("staggered")
+
+
+func _on_pressured_state_changed(is_pressured: bool) -> void:
+	if pressured_label:
+		pressured_label.visible = is_pressured
+
+
+func apply_stagger_damage(amount: float) -> void:
+	if stagger_component:
+		stagger_component.apply_stagger_damage(amount)
+
+
+func set_pressured(pressured: bool) -> void:
+	if stagger_component:
+		stagger_component.set_pressured(pressured)
+
+
+func is_staggered() -> bool:
+	if stagger_component:
+		return stagger_component.is_staggered
+	return false
+
+
+func is_pressured() -> bool:
+	if stagger_component:
+		return stagger_component.is_pressured
+	return false
+
+
+func apply_spell_hit(spell_data: SpellData) -> void:
+	# Apply stagger damage from spell
+	if stagger_component:
+		stagger_component.apply_stagger_damage(float(spell_data.stagger_power))
+	
+	# Check if spell matches weakness - apply PRESSURED status
+	if enemy_data and spell_data.spell_type == enemy_data.spell_weakness_type:
+		set_pressured(true)
+		print("[BaseEnemy:%s] Hit by weakness spell type! Now PRESSURED" % name)

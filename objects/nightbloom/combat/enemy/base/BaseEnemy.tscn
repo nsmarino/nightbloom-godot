@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://c20lyw7iedrn6" path="res://objects/nightbloom/combat/enemy/base/states/evade.gd" id="7_evade"]
 [ext_resource type="Script" uid="uid://dphcinui2mucp" path="res://objects/nightbloom/combat/enemy/base/states/receive_attack.gd" id="8_receive_attack"]
 [ext_resource type="Script" uid="uid://churbt5628ilx" path="res://objects/nightbloom/combat/enemy/base/states/death.gd" id="9_death"]
+[ext_resource type="Script" path="res://objects/nightbloom/combat/enemy/base/states/staggered.gd" id="10_staggered"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_collider"]
 
@@ -81,26 +82,41 @@ state_name = "receive_attack"
 script = ExtResource("9_death")
 state_name = "death"
 
+[node name="Staggered" type="Node" parent="StateMachine"]
+script = ExtResource("10_staggered")
+state_name = "staggered"
+
 [node name="Visuals" type="Node3D" parent="." unique_id=1872358325]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2888794, 0)
 
 [node name="StaggerStatus" type="SubViewport" parent="Visuals" unique_id=313100524]
-size = Vector2i(200, 42)
-
-[node name="PressureIndicator" type="Label" parent="Visuals/StaggerStatus" unique_id=1831062431]
-custom_minimum_size = Vector2(200, 0)
-offset_top = 24.0
-offset_right = 200.0
-offset_bottom = 47.0
-text = "PRESSURED"
-horizontal_alignment = 1
+size = Vector2i(200, 64)
 
 [node name="ProgressBar" type="ProgressBar" parent="Visuals/StaggerStatus" unique_id=1290067032]
 offset_right = 200.0
 offset_bottom = 20.0
 theme_override_styles/background = SubResource("StyleBoxFlat_bxjew")
-value = 50.0
+max_value = 100.0
+value = 0.0
 show_percentage = false
+
+[node name="PressureIndicator" type="Label" parent="Visuals/StaggerStatus" unique_id=1831062431]
+visible = false
+custom_minimum_size = Vector2(200, 0)
+offset_top = 22.0
+offset_right = 200.0
+offset_bottom = 45.0
+text = "PRESSURED"
+horizontal_alignment = 1
+
+[node name="StaggeredIndicator" type="Label" parent="Visuals/StaggerStatus"]
+visible = false
+custom_minimum_size = Vector2(200, 0)
+offset_top = 42.0
+offset_right = 200.0
+offset_bottom = 65.0
+text = "STAGGERED"
+horizontal_alignment = 1
 
 [node name="Sprite3D" type="Sprite3D" parent="Visuals" unique_id=332011548]
 billboard = 1

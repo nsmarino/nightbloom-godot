@@ -20,6 +20,10 @@ var waiting_for_attack_complete: bool = false
 var combat_manager: Node = null
 
 
+# State storage for pause/resume
+var stored_enemy_states: Dictionary = {}  # enemy -> state_name
+
+
 func _ready() -> void:
 	print("[EnemyManager] Initialized")
 	
@@ -28,6 +32,7 @@ func _ready() -> void:
 	Events.turn_started.connect(_on_turn_started)
 	Events.turn_ended.connect(_on_turn_ended)
 	Events.combat_started.connect(_on_combat_started)
+	Events.combat_paused.connect(_on_combat_paused)
 	
 	# Find combat manager for time checking
 	await get_tree().process_frame
@@ -102,15 +107,16 @@ func _on_combat_started() -> void:
 
 
 func _on_turn_intro_started(_is_player_turn: bool) -> void:
-	# During turn intro, snap all enemies to idle immediately
-	print("[EnemyManager] Turn intro started - snapping all enemies to idle")
+	# During turn intro, snap all non-staggered enemies to idle immediately
+	print("[EnemyManager] Turn intro started - snapping non-staggered enemies to idle")
 	is_enemy_turn = false
 	attack_queue.clear()
 	current_attacker = null
 	waiting_for_attack_complete = false
 	
 	for enemy in active_enemies:
-		enemy.command_state("idle")
+		if not enemy.is_staggered():
+			enemy.command_state("idle")
 
 
 func _on_turn_started(is_player_turn: bool) -> void:
@@ -137,7 +143,9 @@ func _start_player_turn() -> void:
 	waiting_for_attack_complete = false
 	
 	for enemy in active_enemies:
-		enemy.command_state("locomotion_slow")
+		# Don't change state of staggered enemies
+		if not enemy.is_staggered():
+			enemy.command_state("locomotion_slow")
 
 
 func _start_enemy_turn() -> void:
@@ -149,15 +157,19 @@ func _start_enemy_turn() -> void:
 		print("[EnemyManager] No active enemies!")
 		return
 	
-	# Create randomized attack queue
-	attack_queue = active_enemies.duplicate()
+	# Create randomized attack queue - only include non-staggered enemies
+	attack_queue.clear()
+	for enemy in active_enemies:
+		if not enemy.is_staggered():
+			attack_queue.append(enemy)
 	attack_queue.shuffle()
 	
-	print("[EnemyManager] Attack queue: %s" % [attack_queue.map(func(e): return e.name)])
+	print("[EnemyManager] Attack queue (non-staggered): %s" % [attack_queue.map(func(e): return e.name)])
 	
-	# All enemies start in idle while waiting
+	# All non-staggered enemies start in idle while waiting
 	for enemy in active_enemies:
-		enemy.command_state("idle")
+		if not enemy.is_staggered():
+			enemy.command_state("idle")
 	
 	# Start the first attack
 	_start_next_attack()
@@ -280,3 +292,58 @@ func command_all_enemies(state_name: String) -> void:
 	print("[EnemyManager] Commanding all enemies to: %s" % state_name)
 	for enemy in active_enemies:
 		enemy.command_state(state_name)
+
+
+func on_enemy_staggered(enemy: BaseEnemy) -> void:
+	print("[EnemyManager] Enemy %s became staggered" % enemy.name)
+	
+	# Remove from attack queue if present
+	attack_queue.erase(enemy)
+	
+	# If this was the current attacker, handle it
+	if current_attacker == enemy:
+		current_attacker = null
+		waiting_for_attack_complete = false
+		if is_enemy_turn and not attack_queue.is_empty():
+			_start_next_attack()
+	
+	# Check if all enemies are now staggered
+	if are_all_enemies_staggered():
+		print("[EnemyManager] === ALL ENEMIES STAGGERED! ===")
+		Events.group_all_staggered.emit(false)  # false = enemy group
+
+
+func are_all_enemies_staggered() -> bool:
+	if active_enemies.is_empty():
+		return false
+	
+	for enemy in active_enemies:
+		if not enemy.is_staggered():
+			return false
+	return true
+
+
+func get_non_staggered_enemies() -> Array[BaseEnemy]:
+	var result: Array[BaseEnemy] = []
+	for enemy in active_enemies:
+		if not enemy.is_staggered():
+			result.append(enemy)
+	return result
+
+
+func _on_combat_paused(paused: bool) -> void:
+	if paused:
+		# Store current states and freeze all non-staggered enemies
+		stored_enemy_states.clear()
+		for enemy in active_enemies:
+			if not enemy.is_staggered():
+				stored_enemy_states[enemy] = enemy.get_current_state_name()
+				enemy.command_state("idle")
+		print("[EnemyManager] Combat paused - enemies frozen")
+	else:
+		# Restore previous states
+		for enemy in stored_enemy_states:
+			if is_instance_valid(enemy) and not enemy.is_staggered():
+				enemy.command_state(stored_enemy_states[enemy])
+		stored_enemy_states.clear()
+		print("[EnemyManager] Combat resumed - enemies unfrozen")

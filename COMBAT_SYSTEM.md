@@ -8,11 +8,13 @@ The combat system features:
 - **Turn-based combat** with alternating player and enemy turns
 - **Turn intro phases** - 2-second transition period at the start of each turn where everyone idles
 - **Shared health pools** - all party members share HP, all enemies share HP
+- **Individual stagger tracking** - each enemy and party member has their own stagger meter
 - **State machine architecture** for both player and enemy behaviors
-- **Action Points (AP)** system for special abilities
+- **Action Points (AP)** and **Mana Points (MP)** systems for special abilities
 - **NavigationMesh pathfinding** with RVO avoidance for enemy movement
 - **Sequential enemy attacks** - enemies attack one at a time during enemy turn
 - **Orbit-based enemy behavior** - enemies circle the player during player turn
+- **Spell targeting system** with camera focus and weakness-based PRESSURED status
 
 ---
 
@@ -80,11 +82,17 @@ Controls the overall combat flow using states:
 ### 3. Follow Camera
 **Script:** `levels/follow_camera.gd`
 
-Simple camera that is a **child of the Pawn**. It maintains a fixed local offset and looks at a target marker (also child of Pawn). Since it's a child, it automatically follows and rotates with the Pawn.
+Simple camera that is a **child of the Pawn**. It maintains a fixed local offset and looks at a target marker (also child of Pawn). Since it's a child, it automatically follows and rotates with the Pawn. Supports target override for spell targeting.
 
 **Key Properties:**
 - `target_path: NodePath` - Path to look-at target (CameraTarget marker)
 - `offset: Vector3` - Local position offset from Pawn
+- `lerp_speed: float` - Smooth lerp speed for target override (default: 5.0)
+
+**Key Methods:**
+- `set_target_override(target)` - Override look-at target (used for spell targeting)
+- `clear_target_override()` - Return to normal target
+- `get_target_override()` - Get current override target
 
 ---
 
@@ -101,10 +109,16 @@ The player-controlled character containing:
 - `HitArea` (Area3D) - Attack detection
 - `StateMachine` - Player state controller
 - `FollowCamera` (Camera3D) - Child camera that follows Pawn
+- `StaggerComponent` instances (one per party member) - Individual stagger tracking
 
 **Key Methods:**
-- `switch_party_member(index)` - Switch active party member
+- `switch_party_member(index)` - Switch active party member (emits `active_party_member_changed` signal)
 - `receive_attack(damage)` - Called when hit by enemy
+- `apply_stagger_damage_to_active(amount)` - Apply stagger damage to active party member
+- `is_active_member_staggered()` - Check if active member is staggered
+- `is_member_staggered(index)` - Check if specific member is staggered
+- `set_active_off_balance(bool)` - Set off-balance status for active member
+- `are_all_members_staggered()` - Check if all party members are staggered (triggers damage multiplier)
 
 ### Player State Machine
 **Script:** `objects/nightbloom/combat/player/state_machine.gd`  
@@ -112,8 +126,9 @@ The player-controlled character containing:
 
 Handles state transitions and responds to combat events:
 - `turn_intro_started` → Immediately snaps to `idle` state
-- `turn_started(true)` → Switches to `locomotion` state
+- `turn_started(true)` → Switches to `locomotion` state, clears off-balance status
 - `turn_started(false)` → Switches to `locomotion_slow` state
+- `turn_ended(true)` → If player was in `attack` state, sets off-balance status
 
 ### Group Resources
 **Script:** `objects/nightbloom/combat/player/group_resources.gd`  
@@ -137,6 +152,7 @@ Shared resources for the player's party:
 **Damage Modifiers:**
 - Guard: 50% damage reduction
 - Vulnerable: 150% damage taken
+- All Party Staggered: 200% damage taken (when all party members are staggered)
 
 ### Player State Base Class
 **Script:** `objects/nightbloom/combat/player/PlayerState.gd`  
@@ -157,11 +173,12 @@ Base class for all player states with:
 | State | Description |
 |-------|-------------|
 | `idle` | Waiting (intro/outro), no movement allowed |
-| `locomotion` | Full-speed movement (8.0) during player turn |
-| `locomotion_slow` | Half-speed movement (4.0) during enemy turn |
-| `attack` | Performing attack animation, uses animation_finished signal |
-| `decide_menu` | Menu open, gameplay paused |
-| `spell` | Casting a spell |
+| `locomotion` | Full-speed movement (8.0) during player turn; blocked if staggered |
+| `locomotion_slow` | Half-speed movement (4.0) during enemy turn; menu only if staggered |
+| `attack` | Performing attack animation, applies stagger damage to enemies in HitArea |
+| `decide_menu` | Menu open, gameplay paused, enemies frozen |
+| `spell` | Casting a spell on selected target, uses SpellData properties |
+| `select_spell_target` | Selecting enemy target for spell, camera lerps to targets |
 | `item` | Using an item |
 | `guard` | Blocking (reduced damage) |
 | `receive_attack` | Being hit, returns to appropriate locomotion based on turn |
@@ -177,6 +194,8 @@ Player attack state uses **animation-driven timing**:
 - Transitions when animation completes
 - `fallback_duration` export as safety net if animation is missing/looping
 - Hitbox timing (`hitbox_start`, `hitbox_end`) uses timers for precise control
+- `stagger_power: int = 20` - Stagger damage applied to all enemies in HitArea
+- Applies stagger damage to each enemy only once per attack
 
 ### Party Member Data
 **Script:** `objects/nightbloom/combat/player/PartyMemberData.gd`  
@@ -185,8 +204,90 @@ Player attack state uses **animation-driven timing**:
 Defines a party member:
 - `display_name: StringName`
 - `character_scene: PackedScene` - 3D character model
+- `character_portrait: Texture2D` - Portrait for HUD display
+- `spells: Array[SpellData]` - Available spells for this character
+- Animation names (`anim_idle`, `anim_locomotion`, `anim_attack`, etc.)
 
-**Examples:** `party-members/Elena.tres`, `party-members/Asa.tres`
+**Examples:** `party-members/Elena.tres`, `party-members/Asa.tres`, `party-members/Granley.tres`, `party-members/June.tres`
+
+### Spell Data
+**Script:** `objects/nightbloom/combat/player/SpellData.gd`  
+**Type:** Resource
+
+Defines a spell:
+- `name: String` - Spell name
+- `animation: String` - Cast animation name (default: "Spell")
+- `spell_type: SpellType` - Element type (EARTH, FIRE, WATER, AIR)
+- `mp_cost: int` - Mana cost (default: 5)
+- `fallback_duration: float` - Cast duration (default: 1.2)
+- `attack_power: int` - HP damage (default: 35)
+- `stagger_power: int` - Stagger damage (default: 25)
+- `start_particle_fx: String` - Particle effect on cast start
+- `contact_particle_fx: String` - Particle effect on hit
+
+**Example:** `resources/spells/earth-spell.tres`
+
+---
+
+## Stagger System
+
+### Overview
+Individual stagger tracking for each combatant (enemies and party members). Stagger builds up from attacks and drains slowly during active turns.
+
+### Stagger Component
+**Script:** `objects/nightbloom/combat/stagger_component.gd`  
+**Class:** `StaggerComponent`
+
+Reusable component that tracks stagger for a single combatant:
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `max_stagger` | 100.0 | Maximum stagger before STAGGERED |
+| `stagger_drain_rate` | 2.0 | Points drained per second |
+| `stagger_duration` | 60.0 | Seconds in STAGGERED state |
+
+**Status Flags:**
+- `is_staggered: bool` - Currently stunned (100% stagger reached)
+- `is_pressured: bool` - Hit by weakness spell (slower drain, increased stagger damage)
+- `is_off_balance: bool` - Attack extended past turn end (increased stagger damage next turn)
+
+**Multipliers:**
+- `pressured_stagger_multiplier: 1.5` - Extra stagger damage when PRESSURED
+- `pressured_drain_multiplier: 0.25` - Slower drain when PRESSURED
+- `off_balance_stagger_multiplier: 1.25` - Extra stagger damage when OFF BALANCE
+
+**Key Methods:**
+- `apply_stagger_damage(amount)` - Add stagger (applies multipliers automatically)
+- `set_pressured(bool)` - Set PRESSURED status
+- `set_off_balance(bool)` - Set OFF BALANCE status
+
+**Signals:**
+- `stagger_changed(current, max_val)` - Stagger amount updated
+- `staggered_state_changed(is_staggered)` - Entered/exited STAGGERED state
+- `pressured_state_changed(is_pressured)` - PRESSURED status changed
+
+### Stagger Drain
+- Drains only during `PLAYER_TURN` and `ENEMY_TURN` states
+- Does NOT drain during turn intros or when combat is paused (menu open)
+- Listens to `Events.stagger_should_drain` signal from CombatManager
+
+### STAGGERED State
+When stagger reaches 100:
+- Entity enters STAGGERED state for 60 seconds
+- Cannot move or attack
+- Stagger timer counts down, exits when timer expires
+- PRESSURED status is cleared when staggered
+
+### OFF BALANCE Status
+- Applied when player attack animation is still playing when turn ends
+- Active party member receives 1.25x stagger damage during next enemy turn
+- Cleared at start of next player turn
+- Displayed in HUD with "OFF BALANCE!" label
+
+### Group Stagger Multiplier
+- When ALL individuals in a group are staggered, incoming HP damage is doubled (2.0x)
+- Applies to both player party and enemy group
+- Checked in `GroupResources.take_damage()` and `EnemyGroupResources.take_damage()`
 
 ---
 
@@ -211,21 +312,30 @@ Defines a party member:
 - `delay_between_attacks: float` - Delay after each enemy attack (default: 0.5)
 
 **Turn Intro Behavior:**
-- `turn_intro_started` signal → All enemies snap to `idle` state
+- `turn_intro_started` signal → All non-staggered enemies snap to `idle` state
 - Attack queue is cleared, state is reset
 
 **Player Turn Behavior:**
-- All enemies enter `locomotion_slow` state
+- All non-staggered enemies enter `locomotion_slow` state
 - Enemies orbit around the player at randomized distances
 
 **Enemy Turn Behavior (Sequential Attacks):**
-1. Creates a **shuffled attack queue** of all enemies
-2. All enemies start in `idle` state
+1. Creates a **shuffled attack queue** of non-staggered enemies only
+2. All non-staggered enemies start in `idle` state
 3. First enemy checks if enough turn time remains (vs `fallback_duration`)
 4. If enough time: enemy enters `pursue` → `attack` → `evade` → `idle`
 5. Enemy emits `attack_cycle_complete` signal when done
 6. After `delay_between_attacks`, next enemy attacks
 7. Continues until queue empty or insufficient time remains
+
+**Pause/Freeze Handling:**
+- `combat_paused(true)` → Stores enemy states, all non-staggered enemies enter `idle`
+- `combat_paused(false)` → Restores previous states
+
+**Stagger Handling:**
+- `on_enemy_staggered(enemy)` - Called when enemy becomes staggered; removes from attack queue
+- `are_all_enemies_staggered()` - Returns true if all enemies staggered (triggers damage multiplier)
+- `get_non_staggered_enemies()` - Returns array of non-staggered enemies
 
 ### Base Enemy
 **Scene:** `objects/nightbloom/combat/enemy/base/BaseEnemy.tscn`  
@@ -237,6 +347,20 @@ Structure:
 - `NavigationAgent3D` - Pathfinding with RVO avoidance
 - `AttackArea` (Area3D) - Hit detection
 - `StateMachine` - Enemy AI states
+- `Visuals/StaggerStatus` (SubViewport) - Stagger UI above enemy
+  - `ProgressBar` - Stagger meter
+  - `PressureIndicator` (Label) - "PRESSURED" text
+  - `StaggeredIndicator` (Label) - "STAGGERED" text
+
+**Stagger Component:**
+Each BaseEnemy creates a `StaggerComponent` child that tracks individual stagger.
+
+**Stagger Methods:**
+- `apply_stagger_damage(amount)` - Apply stagger damage
+- `apply_spell_hit(spell_data)` - Apply spell stagger + check for weakness/PRESSURED
+- `set_pressured(bool)` - Set PRESSURED status
+- `is_staggered()` - Check if currently staggered
+- `is_pressured()` - Check if currently pressured
 
 **Orbit Data (Shared between states):**
 Stored on BaseEnemy so both `locomotion_slow` and `evade` states can access:
@@ -283,6 +407,7 @@ The avoidance system uses the `velocity_computed` signal pattern:
 | `attack_power` | 10 | Damage dealt |
 | `attack_range` | 2.0 | Distance to trigger attack |
 | `pursue_range` | 15.0 | Detection range |
+| `spell_weakness_type` | EARTH | Spell type that triggers PRESSURED status |
 
 **Animation Names:**
 - `anim_idle`: "Idle"
@@ -311,9 +436,10 @@ Base class for enemy states with avoidance-aware helpers:
 | `idle` | Standing still, uses `stop_with_avoidance()` |
 | `locomotion_slow` | **Orbits player** during player turn (see below) |
 | `pursue` | Chasing player using navmesh |
-| `attack` | Performing attack, animation-driven timing |
+| `attack` | Performing attack, animation-driven timing, applies stagger |
 | `evade` | **Returns to orbit position** after attack |
 | `receive_attack` | Being hit, animation-driven timing |
+| `staggered` | **STAGGERED state** - Cannot move/attack for 60 seconds |
 | `death` | Dying |
 
 ### Locomotion Slow (Orbit Behavior)
@@ -355,12 +481,26 @@ Enemy attack state uses **animation-driven timing**:
 - `fallback_duration` export used for:
   - Safety net if animation missing
   - **Time checking** before attack starts (enemy manager checks this)
+- `stagger_power: int = 20` - Stagger damage applied to player's active party member
+
+### Staggered State
+**Script:** `objects/nightbloom/combat/enemy/base/states/staggered.gd`
+
+Enemy state when stagger reaches 100:
+- Plays idle animation (placeholder)
+- Cannot move or attack
+- Notifies enemy manager via `on_enemy_staggered()`
+- Transitions out when `stagger_component.is_staggered` becomes false
+- Returns to `locomotion_slow` (player turn) or `idle` (enemy turn)
 
 ### Enemy Group Resources
 **Script:** `objects/nightbloom/combat/enemy/enemy_group_resources.gd`  
 **Class:** `EnemyGroupResources`
 
 Shared HP pool for all enemies (default: 100 HP).
+
+**Damage Multiplier:**
+- All Enemies Staggered: 200% damage taken (when all enemies are staggered)
 
 ---
 
@@ -373,6 +513,7 @@ Shared HP pool for all enemies (default: 100 HP).
 
 UI Elements:
 - `PlayerResourcesLeft/PlayerHealth` - Player HP bar
+- `PlayerResourcesLeft/PlayerMana` - Player MP bar (blue)
 - `EnemyResources/EnemyHealth` - Enemy HP bar
 - `TurnBar` - Turn timer progress
 - `APContainer` - AP segment bars (3 segments of 30 AP each)
@@ -381,7 +522,22 @@ UI Elements:
   - `EnemyTurnLabel` - Red "ENEMY TURN" text
   - `VictoryLabel` - Gold "VICTORY!" text
   - `DefeatLabel` - Dark red "DEFEAT..." text
-- `DecideMenu` - Menu panel with Spell/Item/Switch buttons
+- `PartyMembers` - HBoxContainer with party member portraits:
+  - Each portrait has a stagger bar and name label
+  - Active member has highlighted border
+- `OffBalanceLabel` - "OFF BALANCE!" warning (shown during enemy turn if applicable)
+- `DecideMenu` - Main menu panel with Spell/Item/Switch buttons
+- `PartySelectMenu` - Submenu for party member selection
+- `SpellSelectMenu` - Submenu for spell selection
+
+### Menu State Machine
+The HUD manages multiple menu states:
+
+| State | Description |
+|-------|-------------|
+| `MAIN` | Main DecideMenu with Spell/Item/Switch buttons |
+| `PARTY_SELECT` | Party member selection submenu |
+| `SPELL_SELECT` | Spell selection submenu (shows active member's spells) |
 
 ### Turn Indicator Animation
 During turn intro phases, the HUD plays a **transition animation**:
@@ -389,6 +545,12 @@ During turn intro phases, the HUD plays a **transition animation**:
 - New turn label scales in from small (0.5x) and fades in
 - Animation duration matches `turn_intro_duration` (2 seconds)
 - Uses Tween for smooth transitions
+
+### Party Portraits
+- Initialized via `initialize_party_portraits(pawn)` from arena controller
+- Displays `character_portrait` texture from PartyMemberData
+- Stagger bars update via `Events.player_stagger_changed` signal
+- Active state visual updates via `Events.active_party_member_changed` signal
 
 ---
 
@@ -447,6 +609,21 @@ Enemies use Godot's built-in **Reciprocal Velocity Obstacle** avoidance:
 | `player_state_changed` | `new_state` | Player state transition |
 | `enemy_state_changed` | `enemy, new_state` | Enemy state transition |
 
+### Stagger Signals
+| Signal | Parameters | Description |
+|--------|------------|-------------|
+| `stagger_should_drain` | `delta: float` | Emit during active turns for stagger drain |
+| `player_stagger_changed` | `member_index, current, max_val` | Party member stagger updated |
+| `enemy_stagger_changed` | `enemy, current, max_val` | Enemy stagger updated |
+| `individual_staggered` | `target, is_player` | Entity entered STAGGERED state |
+| `group_all_staggered` | `is_player_group: bool` | All entities in group staggered |
+| `player_off_balance_changed` | `is_off_balance: bool` | OFF BALANCE status changed |
+
+### Party Signals
+| Signal | Parameters | Description |
+|--------|------------|-------------|
+| `active_party_member_changed` | `member_index: int` | Active party member switched |
+
 ---
 
 ## Input Actions
@@ -481,6 +658,7 @@ Defined in `project.godot`:
 ```
 objects/nightbloom/combat/
 ├── combat_manager.gd
+├── stagger_component.gd          # NEW: Reusable stagger tracking component
 ├── player/
 │   ├── pawn.gd
 │   ├── Pawn.tscn
@@ -488,9 +666,12 @@ objects/nightbloom/combat/
 │   ├── PlayerState.gd
 │   ├── group_resources.gd
 │   ├── PartyMemberData.gd
+│   ├── SpellData.gd              # Spell definition resource
 │   ├── party-members/
 │   │   ├── Elena.tres
-│   │   └── Asa.tres
+│   │   ├── Asa.tres
+│   │   ├── Granley.tres
+│   │   └── June.tres
 │   └── states/
 │       ├── idle.gd
 │       ├── locomotion.gd
@@ -498,6 +679,7 @@ objects/nightbloom/combat/
 │       ├── attack.gd
 │       ├── decide_menu.gd
 │       ├── spell.gd
+│       ├── select_spell_target.gd  # NEW: Spell target selection state
 │       ├── item.gd
 │       ├── guard.gd
 │       ├── receive_attack.gd
@@ -523,10 +705,15 @@ objects/nightbloom/combat/
 │           ├── attack.gd
 │           ├── evade.gd
 │           ├── receive_attack.gd
+│           ├── staggered.gd        # NEW: Enemy staggered state
 │           └── death.gd
 └── hud/
     ├── combat_hud.gd
     └── CombatHud.tscn
+
+resources/
+└── spells/
+    └── earth-spell.tres          # Spell data resource
 
 levels/
 ├── arena.tscn
@@ -556,27 +743,41 @@ autoloads/
 
 ### Player Turn
 1. `turn_started(true)` emitted
-2. Player enters `locomotion` state (full speed, can attack)
-3. Enemies enter `locomotion_slow` state (orbit player)
-4. Turn timer counts down
-5. Player can: move, rotate, attack, open menu
-6. On attack hit: gain 5 AP, enemy takes damage, enemy enters `receive_attack`
-7. Turn ends when timer expires → `ENEMY_TURN_INTRO`
+2. Player OFF BALANCE status cleared
+3. Player enters `locomotion` state (full speed, can attack; blocked if staggered)
+4. Non-staggered enemies enter `locomotion_slow` state (orbit player)
+5. Turn timer counts down, stagger drains for all combatants
+6. Player can: move, rotate, attack, open menu (with submenus for spell/party)
+7. On attack hit: gain 5 AP, enemy takes damage AND stagger damage, enemy enters `receive_attack`
+8. On spell hit: enemy takes damage AND stagger; if weakness match → enemy enters PRESSURED state
+9. If player attack animation extends past turn end → player set to OFF BALANCE
+10. Turn ends when timer expires → `ENEMY_TURN_INTRO`
 
 ### Enemy Turn
 1. `turn_started(false)` emitted
-2. Player enters `locomotion_slow` (half speed, can guard)
-3. Enemy manager creates shuffled attack queue
-4. All enemies start in `idle`
+2. Player enters `locomotion_slow` (half speed, can guard; menu only if staggered)
+3. Enemy manager creates shuffled attack queue (non-staggered enemies only)
+4. All non-staggered enemies start in `idle`
 5. Sequential attack flow:
    - Check if enough time remains for next attack
    - If yes: enemy enters `pursue` → navigates to player
    - When in range: enemy enters `attack`
+   - Player takes HP damage AND stagger damage to active party member
+   - If player OFF BALANCE: stagger damage multiplied by 1.25x
    - After attack animation: enemy enters `evade` (returns to orbit)
    - After evade: enemy enters `idle`, signals completion
    - Wait `delay_between_attacks`, start next enemy
 6. Player hit → enters `receive_attack` → returns to `locomotion_slow`
-7. Turn ends when timer expires → `PLAYER_TURN_INTRO`
+7. Turn timer counts down, stagger drains for all combatants
+8. Turn ends when timer expires → `PLAYER_TURN_INTRO`
+
+### Stagger During Combat
+- Stagger drains only during active `PLAYER_TURN` and `ENEMY_TURN` states
+- Stagger does NOT drain during turn intros or when menu is open (paused)
+- When any combatant reaches 100 stagger → enters STAGGERED state
+- STAGGERED entities cannot move or attack for 60 seconds
+- If ALL enemies staggered → incoming damage doubled
+- If ALL party members staggered → incoming damage doubled
 
 ### Combat End
 - **Victory:** Enemy HP reaches 0, `combat_ended(true)` emitted
@@ -613,13 +814,46 @@ move_with_avoidance(desired_velocity)
 # Actual movement happens in BaseEnemy._on_velocity_computed()
 ```
 
+### Stagger Component Pattern
+Reusable stagger tracking via composition:
+```gdscript
+# Create component
+var stagger_component := StaggerComponent.new()
+add_child(stagger_component)
+
+# Connect to signals for UI/state updates
+stagger_component.stagger_changed.connect(_on_stagger_changed)
+stagger_component.staggered_state_changed.connect(_on_staggered_state_changed)
+
+# Apply damage (multipliers handled internally)
+stagger_component.apply_stagger_damage(amount)
+```
+
+### Spell Targeting Flow
+1. Player opens DecideMenu → selects SPELL
+2. Opens SpellSelectMenu → shows active member's spells with MP costs
+3. Player selects spell → transitions to `select_spell_target` state
+4. Camera lerps to look at enemies as player navigates
+5. Player confirms target → MP and AP spent, transitions to `spell` state
+6. Spell applies damage + stagger, checks for weakness → PRESSURED if match
+
+### PRESSURED Status
+When enemy hit by spell matching their `spell_weakness_type`:
+- Enemy enters PRESSURED state
+- Stagger damage received multiplied by 1.5x
+- Stagger drain rate reduced to 0.25x (nearly paused)
+- Lasts until staggered OR stagger drains to 0
+- Displayed via "PRESSURED" label in enemy's StaggerStatus SubViewport
+
 ---
 
 ## Future Extensions
 
 The system is designed to support:
-- Additional enemy types (new `EnemyData` resources)
-- More party members (new `PartyMemberData` resources)
-- Spell and item systems (placeholder states exist)
+- Additional enemy types (new `EnemyData` resources with unique weaknesses)
+- More party members (new `PartyMemberData` resources with unique spells)
+- Item system (placeholder state exists)
 - Multiple combat arenas (reusable components)
-- Guard and vulnerable state refinements (noted for next update)
+- Guard refinements and deeper vulnerable state mechanics
+- Visual effects for spells (particle systems using SpellData fx fields)
+- Stagger animation replacements for STAGGERED state
